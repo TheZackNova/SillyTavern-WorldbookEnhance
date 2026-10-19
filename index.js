@@ -59,6 +59,8 @@
     /* ---------------- 基础 ---------------- */
 
     function hostEl() { return document.querySelector('#WIMultiSelector'); }
+    /* Container of every native control we guard; falls back to document if ST changes its markup. */
+    function wiPanelRoot() { return document.getElementById('WorldInfo') || document; }
 
     function el(tag, cls, text) {
         const node = document.createElement(tag);
@@ -703,8 +705,10 @@
             swallow(event);
             toast('info', (compactViewport() ? 'Nhấp đúp để mở: ' : 'Nhấp đúp để mở khóa: ') + spec.title);
         };
+        /* Bound on the World Info panel only: a non-passive touchstart on document would make
+           every scroll in the chat wait for JS on mobile. */
         ['mousedown', 'touchstart'].forEach((type) => {
-            document.addEventListener(type, handler, { capture: true, passive: false });
+            wiPanelRoot().addEventListener(type, handler, { capture: true, passive: false });
         });
     }
 
@@ -740,6 +744,16 @@
 
     /* 只取一次、缓存一分钟；拿不到就返回 null，面板照旧平铺，不会空 */
     async function ensureCharLore() {
+        /* Preferred: ST keeps world_info (incl. charLore) in memory as a live module export.
+           Reading it costs nothing, while /api/settings/get downloads the whole settings file
+           (all presets, themes… often several MB) on every chat change. */
+        try {
+            const mod = await import('/scripts/world-info.js');
+            if (mod && mod.world_info && typeof mod.world_info === 'object') {
+                charLoreCache = { at: Date.now(), data: mod.world_info };
+                return charLoreCache.data;
+            }
+        } catch (err) { /* fall back to the settings request */ }
         const now = Date.now();
         if (charLoreCache.data && now - charLoreCache.at < CHAR_LORE_TTL) return charLoreCache.data;
         try {
@@ -2579,6 +2593,11 @@
         return store.entryClickLock !== false;
     }
 
+    /* Whether the double-tap guards should act right now: the master switch wins over the entry-lock setting. */
+    function lockActive() {
+        return enhancementsOn() && clickLockOn();
+    }
+
     function setClickLock(on) {
         store.entryClickLock = !!on;
         persistStore();
@@ -2661,7 +2680,7 @@
 
     function lockRow(row) {
         if (!row) return;
-        const on = clickLockOn();
+        const on = lockActive();
         const bar = row.querySelector('.wbm-edit-bar');
         const barVisible = !!bar && bar.hidden === false;
         const editNode = row.__wbmEditNode;
@@ -2809,7 +2828,7 @@
             if (row.__wbmEditNode === node) delete row.__wbmEditNode;
         }
         node.classList.remove('wbm-field-editing');
-        if (row && clickLockOn()) lockControl(node);
+        if (row && lockActive()) lockControl(node);
         else node.classList.remove('wbm-field-locked');
         /* 收尾扫一遍：这一行里若还有别的残留编辑态（同名控件拿错、重绘时序），一起还原并锁回去，
            不让任何一个框停在"亮着且单击可改"的状态 */
@@ -2820,7 +2839,7 @@
             delete other.dataset.wbmBefore;
             delete other.dataset.wbmDataBefore;
             other.classList.remove('wbm-field-editing');
-            if (clickLockOn()) lockControl(other);
+            if (lockActive()) lockControl(other);
             else if (isTextField(other)) other.readOnly = false;
         });
     }
@@ -2928,7 +2947,7 @@
         setTimeout(() => {
             release();
             node.classList.remove('wbm-field-editing');
-            if (clickLockOn()) lockControl(node);
+            if (lockActive()) lockControl(node);
         }, 20000);
         toast('info', 'Đã tạm mở khóa, trong 20 giây có thể chọn trực tiếp');
     }
@@ -2942,7 +2961,7 @@
             if (!inEntryList(node)) return;
             if (node.closest(LOCK_EXCLUDE_SEL)) return;
             if (node.closest('.wbm-field-bar')) return;
-            if (!clickLockOn()) return;
+            if (!lockActive()) return;
             /* select2 的可见外壳与它内部的搜索框都不是"输入框"的常规语义，单独拦 */
             if (node.closest('.select2-container, .select2-selection')) {
                 event.preventDefault();
@@ -3026,7 +3045,7 @@
             const t = event.target;
             if (!t || !t.closest) return;
             if (!inEntryList(t)) return;
-            if (!clickLockOn()) return;
+            if (!lockActive()) return;
             if (t.closest(LOCK_EXCLUDE_SEL)) return;
             const sel = (t.matches && t.matches('select')) ? t : t.closest('select');
             const field = (t.matches && t.matches('input, textarea')) ? t : null;
@@ -3052,13 +3071,13 @@
             }
             wbmTouchHint();
         };
-        document.addEventListener('touchstart', touchGuard, { capture: true, passive: false });
+        wiPanelRoot().addEventListener('touchstart', touchGuard, { capture: true, passive: false });
         /* 兜底：万一控件被重绘、或 lockRow 没赶上新节点，只要"锁定态下还能聚焦"就当场锁回去。
            判据是能不能改值，不是 class 上有没有 wbm-field-locked。 */
         document.addEventListener('focusin', (event) => {
             const node = event.target;
             if (!node || !inEntryList(node)) return;
-            if (!clickLockOn()) return;
+            if (!lockActive()) return;
             if (node.closest(LOCK_EXCLUDE_SEL)) return;
             if (!node.matches || !node.matches('input, textarea, select')) return;
             if (node.classList.contains('wbm-field-editing')) return;
@@ -3089,7 +3108,7 @@
             const sel = event.target;
             if (!sel || sel.tagName !== 'SELECT') return;
             if (!inEntryList(sel)) return;
-            if (!clickLockOn()) return;
+            if (!lockActive()) return;
             if (sel.classList.contains('wbm-field-editing') || sel.classList.contains('wbm-select-open')) return;
             const prev = sel.dataset.wbmPrev;
             if (!prev) return;
@@ -3115,7 +3134,7 @@
             if (!control) return;
             event.preventDefault();
             event.stopPropagation();
-            if (!clickLockOn()) return;
+            if (!lockActive()) return;
             if (isTextField(control)) { openFieldEditor(control); return; }
             if (control.tagName === 'SELECT') { openSelect(control); return; }
             if (control.type === 'checkbox' || control.type === 'radio') { toggleCheckbox(control); return; }
@@ -3132,7 +3151,7 @@
         document.addEventListener('dblclick', (event) => {
             const shell = event.target instanceof Element ? event.target.closest('.select2-container') : null;
             if (!shell || !inEntryList(shell)) return;
-            if (!clickLockOn()) return;
+            if (!lockActive()) return;
             const select = (function () {
                 const row = shell.closest('.world_entry');
                 const prev = shell.previousElementSibling;
@@ -3238,8 +3257,22 @@
                那一块 DOM 建出来（收起状态下行里只有备注框）。只盯 childList 的话，展开时不会回调，
                正文框就永远拿不到 readonly。这里用 rAF 合帧，一次重绘/一次展开只跑一次。 */
             let scheduled = false;
-            previewObserver = new MutationObserver(() => {
-                if (scheduled) return;
+            /* Only new ST elements need a pass. Skip text-only changes (e.g. ST's token counter
+               while typing) and nodes we inserted or moved ourselves, which would otherwise
+               re-run the whole page scan for nothing. */
+            const OWN_NODES = '.wbm-entry-actions, .wbm-edit-bar, .wbm-field-bar, .wbm-entry-favbar, .wbm-preview-btn, .wbm-fav-entry-btn';
+            const needsPass = (records) => {
+                for (const record of records) {
+                    for (const node of record.addedNodes) {
+                        if (node.nodeType !== 1) continue;
+                        if (node.closest && node.closest(OWN_NODES)) continue;
+                        return true;
+                    }
+                }
+                return false;
+            };
+            previewObserver = new MutationObserver((records) => {
+                if (scheduled || !needsPass(records)) return;
                 scheduled = true;
                 const run = () => { scheduled = false; injectPreviewButtons(); };
                 if (typeof requestAnimationFrame === 'function') requestAnimationFrame(run);
@@ -5071,7 +5104,21 @@
         }
     }
 
-    async function ensureFilterPatch() {
+    /* Concurrent callers share one attempt; otherwise both pass the flag check before the
+       import resolves and applyFilters ends up wrapped twice (every filter runs twice). */
+    let filterPatchPromise = null;
+    function ensureFilterPatch() {
+        if (wiFilterPatched) return Promise.resolve(true);
+        if (!filterPatchPromise) {
+            filterPatchPromise = installFilterPatch().then((ok) => {
+                if (!ok) filterPatchPromise = null;
+                return ok;
+            });
+        }
+        return filterPatchPromise;
+    }
+
+    async function installFilterPatch() {
         if (wiFilterPatched) return true;
         try {
             const mod = await import('/scripts/world-info.js');
@@ -5079,6 +5126,8 @@
             if (!helper || typeof helper.applyFilters !== 'function') return false;
             const original = helper.applyFilters.bind(helper);
             helper.applyFilters = (...args) => {
+                /* Master switch off = plain ST behaviour */
+                if (!enhancementsOn()) return original(...args);
                 if (Array.isArray(args[0]) && scopeFilterEnabled()) {
                     const term = searchTermOf(helper);
                     if (term) {
@@ -5119,8 +5168,19 @@
         }
     }
 
+    /* Marks the entry list while one of our filters is active, so CSS can explain an empty
+       result instead of showing a blank list (looks like the entries were lost). */
+    function syncFilterFlag() {
+        const list = document.querySelector('#world_popup_entries_list');
+        if (!list) return;
+        const on = enhancementsOn() && (entryFavOnly || entryDisabledOnly || entryStateFilter.size > 0);
+        if (on) list.setAttribute('data-wbm-filtering', '1');
+        else list.removeAttribute('data-wbm-filtering');
+    }
+
     /* 改了筛选条件后要让酒馆重算一次列表：onDataChanged 就是它自己的 updateEditor() */
     async function refreshFilterView() {
+        syncFilterFlag();
         const ok = await ensureFilterPatch();
         if (ok) {
             try {
@@ -7026,6 +7086,12 @@
             document.documentElement.setAttribute('data-wbm-off', '1');
             teardownInjected();
         }
+        /* Our filters live inside ST's own list pipeline: re-run it so a list filtered or
+           pinned by us goes back to native (or gets our filters back) right away. */
+        const filtering = entryFavOnly || entryDisabledOnly || entryStateFilter.size
+            || entryFavPinOn() || scopeFilterEnabled();
+        if (wiFilterPatched && filtering) refreshFilterView();
+        syncFilterFlag();
         syncPanelNotes();
     }
 

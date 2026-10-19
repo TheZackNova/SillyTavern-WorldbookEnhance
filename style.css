@@ -2198,3 +2198,13 @@ textarea.wbm-content-editing {
         min-width: 0;
     }
 }
+
+/* Empty result while a "Lọc" filter is active: say why instead of showing a blank list */
+html:not([data-wbm-off]) #world_popup_entries_list[data-wbm-filtering="1"]:not(:has(.world_entry))::before {
+    content: "Không có mục nào khớp bộ lọc. Bỏ chọn bộ lọc ở thanh “Lọc” để xem tất cả.";
+    display: block;
+    padding: 16px 8px;
+    text-align: center;
+    opacity: .7;
+    font-size: .9em;
+}
