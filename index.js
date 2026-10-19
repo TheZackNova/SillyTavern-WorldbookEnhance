@@ -7066,7 +7066,7 @@
 
             '<label class="checkbox_label wbm-opt-label" for="wbm-opt-enhance">',
             '<input id="wbm-opt-enhance" type="checkbox">',
-            '<span class="wbm-opt-text"><span class="wbm-opt-title">Tắt toàn bộ (quay về SillyTavern gốc)</span>',
+            '<span class="wbm-opt-text"><span class="wbm-opt-title">Bật các cải tiến (bỏ chọn = quay về SillyTavern gốc)</span>',
             '<span class="wbm-opt-note" id="wbm-note-enhance"></span></span>',
             '</label>',
 
