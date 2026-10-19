@@ -1,5 +1,5 @@
 {
-    "display_name": "双端酒馆原生功能优化",
+    "display_name": "Tối ưu tính năng gốc SillyTavern (PC & Mobile)",
     "loading_order": 1000,
     "requires": [],
     "optional": [],

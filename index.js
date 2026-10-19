@@ -31,7 +31,7 @@
     const COLLAPSED_COUNT = 5;
 
     if (window.__worldbookEnhance === VERSION) {
-        console.warn('[wbm] 已有一份 v' + VERSION + ' 在跑，这一份被跳过（多半是同目录里留了旧副本）：build=' + BUILD);
+        console.warn('[wbm] Đã có một bản v' + VERSION + ' đang chạy, bỏ qua bản này (thường do còn bản cũ trong cùng thư mục): build=' + BUILD);
         return;
     }
     window.__worldbookEnhance = VERSION;
@@ -145,7 +145,7 @@
             if (isIOS) return;
             if (!/Android/i.test(ua)) return;
             document.documentElement.classList.add('wbm-quiet-resize');
-            console.info('[wbm] 已压住移动端 html 定位 hack：键盘弹出/收起不再强制两次整页重排');
+            console.info('[wbm] Đã vô hiệu hack định vị html trên di động: bật/tắt bàn phím không còn ép bố cục lại toàn trang hai lần');
         } catch (err) {
             /* 加不上就算了，最多回到原生表现 */
         }
@@ -212,9 +212,9 @@
        这里只做"减法"——关掉哪一面，就不在那一面里找。三项全开＝完全等于原生行为。 */
     const SEARCH_SCOPE_VALUES = ['title', 'keys', 'body'];
     const SEARCH_SCOPES = [
-        { value: 'title', label: '标题', hint: '备注名' },
-        { value: 'keys', label: '关键词', hint: '主关键词与可选过滤器' },
-        { value: 'body', label: '正文', hint: '条目正文' },
+        { value: 'title', label: 'Tiêu đề', hint: 'Tên ghi chú' },
+        { value: 'keys', label: 'Từ khóa', hint: 'Từ khóa chính và bộ lọc phụ' },
+        { value: 'body', label: 'Nội dung', hint: 'Nội dung mục' },
     ];
 
     const store = {
@@ -422,11 +422,11 @@
             store.entryFavPin = legacy.entryPin;
             store.searchScope = normalizeSearchScope(legacyGet('wbm-search-scope', null), SEARCH_SCOPE_VALUES.slice());
             store.mode = 'local';
-            console.error('[wbm] 取不到酒馆的 extension_settings，收藏只能暂存浏览器，手机不会同步');
+            console.error('[wbm] Không lấy được extension_settings của SillyTavern, mục yêu thích chỉ lưu tạm trên trình duyệt, điện thoại sẽ không đồng bộ');
         }
         store.loaded = true;
-        console.info('[wbm] 收藏存储=' + store.mode + '，书 ' + store.favBooks.length
-            + ' 本、条目 ' + store.favEntries.length + ' 条');
+        console.info('[wbm] Lưu yêu thích=' + store.mode + ', lorebook ' + store.favBooks.length
+            + ' cuốn, mục ' + store.favEntries.length + ' mục');
         /* 便于在控制台核对：__wbmStore() */
         window.__wbmStore = () => ({
             mode: store.mode,
@@ -472,7 +472,7 @@
             window.localStorage.setItem('wbm-fav-entry-pin', store.entryFavPin ? '1' : '0');
             window.localStorage.setItem('wbm-search-scope', JSON.stringify(store.searchScope));
         } catch (err) {
-            console.warn('[wbm] 收藏保存失败', err);
+            console.warn('[wbm] Lưu yêu thích thất bại', err);
         }
     }
 
@@ -506,18 +506,18 @@
         for (const opt of sel.options) {
             if (String(opt.textContent || '').trim() === name && String(opt.value || '') !== '') { index = opt.value; break; }
         }
-        if (index === null) { toast('warning', '世界书列表还没加载完'); return; }
-        if (String(sel.value) === String(index)) { toast('info', '正在编辑：' + name); return; }
+        if (index === null) { toast('warning', 'Danh sách lorebook chưa tải xong'); return; }
+        if (String(sel.value) === String(index)) { toast('info', 'Đang chỉnh sửa: ' + name); return; }
         sel.value = index;
         fireChange(sel);
         state.signature = '';
         render();
-        toast('info', '已跳转：' + name);
+        toast('info', 'Đã chuyển đến: ' + name);
     }
 
     /* ---------------- 「选择以编辑」接管（手机端：可搜索的选择面板） ---------------- */
 
-    const EDITOR_PLACEHOLDER = '--- 选择以编辑 ---';
+    const EDITOR_PLACEHOLDER = '--- Chọn để chỉnh sửa ---';
 
     let lastEditorOpen = 0;
     function requestEditorPicker() {
@@ -554,7 +554,7 @@
         const btn = document.querySelector('.wbm-editor-btn');
         if (!btn) return;
         const name = currentEditingName();
-        btn.textContent = name ? '编辑中：' + name : EDITOR_PLACEHOLDER;
+        btn.textContent = name ? 'Đang sửa: ' + name : EDITOR_PLACEHOLDER;
         btn.classList.toggle('active', !!name);
     }
 
@@ -564,19 +564,19 @@
        同样的遮罩与卡片、点一下即生效。桌面端不动（有 select2 / 原生下拉本来就顺手）。 */
 
     const NATIVE_SELECT_TITLES = {
-        position: '插入位置',
-        entryLogicType: '关键词逻辑',
-        entryStateSelector: '条目状态',
-        caseSensitive: '区分大小写',
-        matchWholeWords: '整词匹配',
-        useGroupScoring: '分组计分',
+        position: 'Vị trí chèn',
+        entryLogicType: 'Logic từ khóa',
+        entryStateSelector: 'Trạng thái mục',
+        caseSensitive: 'Phân biệt hoa thường',
+        matchWholeWords: 'Khớp nguyên từ',
+        useGroupScoring: 'Tính điểm theo nhóm',
     };
 
     /* 工具栏上这两个也是原生下拉：条目排序（优先级/自定义/深度…）与每页条目数。
        它们不在条目列表里，单击保护管不到，所以这里自己拦——同样是"双击才开"。 */
     const TOOLBAR_SELECT_SPECS = [
-        { selector: '#world_info_sort_order', title: '条目排序' },
-        { selector: 'select.J-paginationjs-size-select', title: '每页条目数' },
+        { selector: '#world_info_sort_order', title: 'Sắp xếp mục' },
+        { selector: 'select.J-paginationjs-size-select', title: 'Số mục mỗi trang' },
     ];
 
     function toolbarSelectSpec(select) {
@@ -607,7 +607,7 @@
     function nativeSelectTitle(select) {
         const spec = toolbarSelectSpec(select);
         if (spec) return spec.title;
-        return NATIVE_SELECT_TITLES[String(select.name || '')] || '选择';
+        return NATIVE_SELECT_TITLES[String(select.name || '')] || 'Chọn';
     }
 
     let nativePickerAt = 0;
@@ -656,7 +656,7 @@
             });
             document.documentElement.appendChild(mask);
         } catch (err) {
-            console.warn('[wbm] 原生下拉换浮层失败', err);
+            console.warn('[wbm] Thay menu thả xuống gốc bằng cửa sổ nổi thất bại', err);
         }
     }
 
@@ -701,7 +701,7 @@
             nativePickerNode = select;
             nativePickerAt = now;
             swallow(event);
-            toast('info', (compactViewport() ? '双击打开：' : '双击解锁：') + spec.title);
+            toast('info', (compactViewport() ? 'Nhấp đúp để mở: ' : 'Nhấp đúp để mở khóa: ') + spec.title);
         };
         ['mousedown', 'touchstart'].forEach((type) => {
             document.addEventListener(type, handler, { capture: true, passive: false });
@@ -763,7 +763,7 @@
             charLoreCache = { at: Date.now(), data: wi || {} };
             return charLoreCache.data;
         } catch (err) {
-            console.warn('[wbm] 取不到 world_info 设置，附加世界书这一组暂缺', err);
+            console.warn('[wbm] Không lấy được cài đặt world_info, tạm thiếu nhóm lorebook bổ sung', err);
             return null;
         }
     }
@@ -796,12 +796,12 @@
         });
 
         const buckets = {
-            character: { title: '角色卡世界书', names: [] },
-            extra: { title: '附加世界书', names: [] },
-            chat: { title: '聊天世界书', names: [] },
-            persona: { title: '人设世界书', names: [] },
-            global: { title: '全局世界书', names: [] },
-            other: { title: '其他世界书', names: [] },
+            character: { title: 'Lorebook thẻ nhân vật', names: [] },
+            extra: { title: 'Lorebook bổ sung', names: [] },
+            chat: { title: 'Lorebook chat', names: [] },
+            persona: { title: 'Lorebook persona', names: [] },
+            global: { title: 'Lorebook toàn cục', names: [] },
+            other: { title: 'Lorebook khác', names: [] },
         };
 
         for (const opt of sel.options) {
@@ -845,8 +845,8 @@
         const none = el('div', 'wbm-picker-row wbm-picker-exit' + (current === '' ? ' active' : ''));
         none.dataset.role = 'picker-row';
         none.dataset.value = '';
-        none.dataset.name = '--- 选择以编辑 ---';
-        none.appendChild(el('span', 'wbm-picker-name', '--- 选择以编辑 ---'));
+        none.dataset.name = '--- Chọn để chỉnh sửa ---';
+        none.appendChild(el('span', 'wbm-picker-name', '--- Chọn để chỉnh sửa ---'));
         none.appendChild(el('span', 'wbm-picker-radio'));
         list.appendChild(none);
 
@@ -860,7 +860,7 @@
                 list.appendChild(pickerRow({ name, value }, current));
                 hits += 1;
             }
-            if (hits === 0) list.appendChild(el('div', 'wbm-none', '没有匹配的世界书'));
+            if (hits === 0) list.appendChild(el('div', 'wbm-none', 'Không có lorebook phù hợp'));
             return;
         }
 
@@ -872,7 +872,7 @@
             list.appendChild(head);
             group.names.forEach((book) => list.appendChild(pickerRow(book, current)));
         });
-        if (!groups.length) list.appendChild(el('div', 'wbm-none', '还没有世界书'));
+        if (!groups.length) list.appendChild(el('div', 'wbm-none', 'Chưa có lorebook nào'));
     }
 
     function filterEditorPicker(query) {
@@ -1027,13 +1027,13 @@
         try {
             closeEditorPicker(true);
             const sel = editorSelect();
-            if (!sel) { console.warn('[wbm] world_editor_select 不存在'); return; }
+            if (!sel) { console.warn('[wbm] world_editor_select không tồn tại'); return; }
 
             const { mask, sheet } = makePickerShell();
             state.picker = mask;
 
             const grip = el('div', 'wbm-picker-grip');
-            const { head, input } = buildPickerHead('搜索世界书');
+            const { head, input } = buildPickerHead('Tìm lorebook');
 
             const list = el('div', 'wbm-picker-list');
             fillEditorPickerList(list, '');
@@ -1112,7 +1112,7 @@
             const mod = await import('/scripts/world-info.js');
             return mod && typeof mod.moveWorldInfoEntry === 'function' ? mod.moveWorldInfoEntry : null;
         } catch (err) {
-            console.warn('[wbm] 拿不到 moveWorldInfoEntry，保留 ST 原生弹窗', err);
+            console.warn('[wbm] Không lấy được moveWorldInfoEntry, giữ hộp thoại gốc của ST', err);
             return null;
         }
     }
@@ -1178,7 +1178,7 @@
                 const pager = window.jQuery && window.jQuery('#world_info_pagination');
                 if (pager && pager.length) pager.pagination('go', snap.page);
             } catch (err) {
-                console.warn('[wbm] 分页还原失败', err);
+                console.warn('[wbm] Khôi phục phân trang thất bại', err);
             }
         };
 
@@ -1231,9 +1231,9 @@
             state.picker = mask;
 
             const grip = el('div', 'wbm-picker-grip');
-            const { head, input } = buildPickerHead('搜索世界书');
+            const { head, input } = buildPickerHead('Tìm lorebook');
             const title = el('div', 'wbm-picker-title',
-                (entryName ? '「' + entryName + '」' : '这条条目') + '移入 / 复制到：');
+                (entryName ? '“' + entryName + '”' : 'Mục này') + ' — chuyển / sao chép đến:');
 
             const list = el('div', 'wbm-picker-list');
             const rows = [];
@@ -1247,13 +1247,13 @@
                 list.appendChild(row);
                 rows.push(row);
             });
-            if (targets.length === 0) list.appendChild(el('div', 'wbm-picker-empty', '没有其它世界书可以放'));
+            if (targets.length === 0) list.appendChild(el('div', 'wbm-picker-empty', 'Không có lorebook nào khác để đặt vào'));
 
             const actions = el('div', 'wbm-picker-actions');
-            const moveBtn = el('button', 'wbm-picker-action primary', '移动到所选');
+            const moveBtn = el('button', 'wbm-picker-action primary', 'Chuyển vào lorebook đã chọn');
             moveBtn.type = 'button';
             moveBtn.disabled = true;
-            const copyBtn = el('button', 'wbm-picker-action', '复制到所选');
+            const copyBtn = el('button', 'wbm-picker-action', 'Sao chép vào lorebook đã chọn');
             copyBtn.type = 'button';
             copyBtn.disabled = true;
             actions.appendChild(moveBtn);
@@ -1284,18 +1284,18 @@
                     console.error('[wbm] move/copy failed', err);
                 }
                 if (ok) {
-                    toast('info', (deleteOriginal ? '已移动：' : '已复制：') + targetName);
+                    toast('info', (deleteOriginal ? 'Đã chuyển: ' : 'Đã sao chép: ') + targetName);
                     pushHistory({
                         at: Date.now(),
                         act: deleteOriginal ? 'move' : 'copy',
                         count: 1,
                         from: sourceWorld,
                         to: targetName,
-                        names: [entryName || ('条目 ' + uid)],
+                        names: [entryName || ('Mục ' + uid)],
                     });
                     restoreEntryUi(snap);
                 } else {
-                    toast('warning', '操作没成功，条目仍在原处');
+                    toast('warning', 'Thao tác không thành công, mục vẫn ở chỗ cũ');
                 }
             };
 
@@ -1379,22 +1379,22 @@
 
     function openBatchPicker() {
         const bookName = currentEditingName();
-        if (!bookName) { toast('warning', '先在「选择以编辑」里选中要操作的 World Info'); return; }
+        if (!bookName) { toast('warning', 'Hãy chọn World Info cần thao tác trong “Chọn để chỉnh sửa” trước'); return; }
 
         (async () => {
             let mod = null;
             try {
                 mod = await import('/scripts/world-info.js');
             } catch (err) {
-                console.error('[wbm] 批量功能无法加载 world-info.js', err);
+                console.error('[wbm] Tính năng hàng loạt không tải được world-info.js', err);
             }
             if (!mod || typeof mod.loadWorldInfo !== 'function') {
-                toast('warning', '当前版本拿不到世界书接口，批量功能不可用');
+                toast('warning', 'Phiên bản hiện tại không truy cập được API lorebook, không dùng được tính năng hàng loạt');
                 return;
             }
             let data = null;
             try { data = await mod.loadWorldInfo(bookName); } catch (err) { console.error(err); }
-            if (!data || !data.entries) { toast('warning', '这本书没有条目'); return; }
+            if (!data || !data.entries) { toast('warning', 'Lorebook này không có mục nào'); return; }
 
             /* 顺序沿用 ST 自己「排序」下拉里当前选的那一档（Priority / Custom / Title / Tokens / Depth / Order / UID …），
                直接调宿主导出的 sortWorldInfoEntries，和原生条目列表、原生搜索结果的顺序完全一致。
@@ -1425,13 +1425,13 @@
                     ordered = ordered.sort(manualOrder);
                 }
             } catch (err) {
-                console.warn('[wbm] 沿用原生排序失败，回退手动顺序', err);
+                console.warn('[wbm] Dùng thứ tự sắp xếp gốc thất bại, quay về thứ tự thủ công', err);
                 ordered = Object.values(data.entries).sort(manualOrder);
             }
 
             const entries = ordered
                 .map((entry) => {
-                    const name = String(entry.comment || '').trim() || ('条目 ' + entry.uid);
+                    const name = String(entry.comment || '').trim() || ('Mục ' + entry.uid);
                     const keys = Array.isArray(entry.key) ? entry.key.join(' ') : String(entry.key || '');
                     return {
                         uid: String(entry.uid),
@@ -1443,7 +1443,7 @@
                         bodyLower: String(entry.content || '').toLowerCase(),
                     };
                 });
-            if (entries.length === 0) { toast('warning', '这本书没有条目'); return; }
+            if (entries.length === 0) { toast('warning', 'Lorebook này không có mục nào'); return; }
 
             try {
                 closeEditorPicker(true);
@@ -1451,11 +1451,11 @@
                 state.picker = mask;
 
                 const grip = el('div', 'wbm-picker-grip');
-                const { head, input } = buildPickerHead('搜索条目');
+                const { head, input } = buildPickerHead('Tìm mục');
                 /* 三个搜索面开关：默认全开，可以逐个关掉看只命中哪一面（全关就一条都不列） */
                 const filters = el('div', 'wbm-picker-filters');
                 const fieldOn = { title: true, key: true, content: true };
-                [['title', '标题'], ['key', '关键词'], ['content', '正文']].forEach(([key, label]) => {
+                [['title', 'Tiêu đề'], ['key', 'Từ khóa'], ['content', 'Nội dung']].forEach(([key, label]) => {
                     const chip = el('button', 'wbm-picker-chip', label);
                     chip.type = 'button';
                     chip.dataset.field = key;
@@ -1464,7 +1464,7 @@
                 });
                 const title = el('div', 'wbm-picker-title', '');
                 const list = el('div', 'wbm-picker-list');
-                const empty = el('div', 'wbm-picker-empty', '没有匹配的条目');
+                const empty = el('div', 'wbm-picker-empty', 'Không có mục phù hợp');
                 empty.style.display = 'none';
                 list.appendChild(empty);
                 const actions = el('div', 'wbm-picker-actions');
@@ -1532,10 +1532,10 @@
                     const shown = visibleRows().length;
                     const filtering = input.value.trim() !== ''
                         || !fieldOn.title || !fieldOn.key || !fieldOn.content;
-                    const more = filtering ? ' · 命中 ' + shown + ' 条' : '';
-                    title.textContent = '已选 ' + checked.size + ' 条（当前书：' + bookName + '）' + more;
+                    const more = filtering ? ' · khớp ' + shown + ' mục' : '';
+                    title.textContent = 'Đã chọn ' + checked.size + ' mục (lorebook hiện tại: ' + bookName + ')' + more;
                     const allBtn = actions.querySelector('[data-role="batch-all"]');
-                    if (allBtn) allBtn.textContent = allVisibleChecked() ? '取消全选' : '全选';
+                    if (allBtn) allBtn.textContent = allVisibleChecked() ? 'Bỏ chọn tất cả' : 'Chọn tất cả';
                     const invertBtn = actions.querySelector('[data-role="batch-invert"]');
                     if (invertBtn) invertBtn.disabled = shown === 0;
                     const nextBtn = actions.querySelector('[data-role="batch-next"]');
@@ -1545,19 +1545,19 @@
                 const renderActions = () => {
                     actions.textContent = '';
                     if (mode === 'entries') {
-                        const allBtn = mkBtn('全选', false);
+                        const allBtn = mkBtn('Chọn tất cả', false);
                         allBtn.dataset.role = 'batch-all';
-                        const invertBtn = mkBtn('反选', false);
+                        const invertBtn = mkBtn('Đảo chọn', false);
                         invertBtn.dataset.role = 'batch-invert';
-                        const delBtn = mkBtn('删除', false);
+                        const delBtn = mkBtn('Xóa', false);
                         delBtn.dataset.role = 'batch-delete';
                         delBtn.classList.add('danger');
-                        const nextBtn = mkBtn('下一步', true);
+                        const nextBtn = mkBtn('Tiếp theo', true);
                         nextBtn.classList.add('wide');
                         nextBtn.dataset.role = 'batch-next';
-                        const recOnBtn = mkBtn('递归：开启', false);
+                        const recOnBtn = mkBtn('Đệ quy: bật', false);
                         recOnBtn.dataset.role = 'batch-rec-on';
-                        const recOffBtn = mkBtn('递归：关闭', false);
+                        const recOffBtn = mkBtn('Đệ quy: tắt', false);
                         recOffBtn.dataset.role = 'batch-rec-off';
                         actions.appendChild(allBtn);
                         actions.appendChild(invertBtn);
@@ -1568,7 +1568,7 @@
                         let disarmTimer = null;
                         const disarm = () => {
                             if (disarmTimer) { clearTimeout(disarmTimer); disarmTimer = null; }
-                            delBtn.textContent = '删除';
+                            delBtn.textContent = 'Xóa';
                             delBtn.classList.remove('armed');
                         };
                         const runDelete = async () => {
@@ -1578,10 +1578,10 @@
                             closeEditorPicker(true);
                             const removed = await runBatchDelete(bookName, uids);
                             if (removed > 0) {
-                                toast('info', '已删除 ' + removed + ' 条，可在「操作历史」里恢复');
+                                toast('info', 'Đã xóa ' + removed + ' mục, có thể khôi phục trong “Lịch sử thao tác”');
                                 restoreEntryUi(snap);
                             } else {
-                                toast('warning', '删除没有成功');
+                                toast('warning', 'Xóa không thành công');
                             }
                         };
                         allBtn.addEventListener('click', () => {
@@ -1599,11 +1599,11 @@
                             const snap = snapshotEntryUi();
                             const count = await runBatchRecursion(bookName, Array.from(checked), value);
                             if (count > 0) {
-                                toast('info', (value ? '已开启' : '已关闭') + '递归两项：' + count + ' 条');
+                                toast('info', (value ? 'Đã bật' : 'Đã tắt') + ' cả hai tùy chọn đệ quy: ' + count + ' mục');
                                 restoreEntryUi(snap);
                                 closeEditorPicker();
                             } else {
-                                toast('info', '选中的条目已经是这个状态了，没有要改的');
+                                toast('info', 'Các mục đã chọn đã ở trạng thái này rồi, không có gì cần đổi');
                             }
                         };
                         recOnBtn.addEventListener('click', () => runRec(true));
@@ -1613,7 +1613,7 @@
                             if (!checked.size) return;
                             if (!delBtn.classList.contains('armed')) {
                                 delBtn.classList.add('armed');
-                                delBtn.textContent = '确认删除 ' + checked.size + ' 条';
+                                delBtn.textContent = 'Xác nhận xóa ' + checked.size + ' mục';
                                 disarmTimer = setTimeout(disarm, 3000);
                                 return;
                             }
@@ -1627,12 +1627,12 @@
                         });
                         refreshEntryState();
                     } else {
-                        const backBtn = mkBtn('返回', false);
+                        const backBtn = mkBtn('Quay lại', false);
                         backBtn.addEventListener('click', () => { mode = 'entries'; render(); });
-                        const moveBtn = mkBtn('移动到所选', true);
+                        const moveBtn = mkBtn('Chuyển vào lorebook đã chọn', true);
                         moveBtn.disabled = !selectedTarget;
                         moveBtn.dataset.role = 'batch-move';
-                        const copyBtn = mkBtn('复制到所选', false);
+                        const copyBtn = mkBtn('Sao chép vào lorebook đã chọn', false);
                         copyBtn.disabled = !selectedTarget;
                         copyBtn.dataset.role = 'batch-copy';
                         const run = async (deleteOriginal) => {
@@ -1641,7 +1641,7 @@
                             closeEditorPicker(true);
                             const count = await runBatchMove(bookName, selectedTarget, Array.from(checked), deleteOriginal);
                             if (count > 0) {
-                                toast('info', (deleteOriginal ? '已移动 ' : '已复制 ') + count + ' 条 → ' + selectedTarget);
+                                toast('info', (deleteOriginal ? 'Đã chuyển ' : 'Đã sao chép ') + count + ' mục → ' + selectedTarget);
                                 pushHistory({
                                     at: Date.now(),
                                     act: deleteOriginal ? 'move' : 'copy',
@@ -1652,7 +1652,7 @@
                                 });
                                 restoreEntryUi(snap);
                             } else {
-                                toast('warning', '批量操作没有成功');
+                                toast('warning', 'Thao tác hàng loạt không thành công');
                             }
                         };
                         moveBtn.addEventListener('click', () => { run(true); });
@@ -1693,10 +1693,10 @@
                     list.textContent = '';
                     list.appendChild(empty);
                     input.value = '';
-                    input.placeholder = mode === 'entries' ? '搜索条目' : '搜索世界书';
+                    input.placeholder = mode === 'entries' ? 'Tìm mục' : 'Tìm lorebook';
                     filters.style.display = mode === 'entries' ? '' : 'none';
                     if (mode === 'entries') {
-                        empty.textContent = '没有匹配的条目';
+                        empty.textContent = 'Không có mục phù hợp';
                         entries.forEach((item) => {
                             const row = el('div', 'wbm-picker-row' + (checked.has(item.uid) ? ' active' : ''));
                             row.dataset.uid = item.uid;
@@ -1706,8 +1706,8 @@
                             list.appendChild(row);
                         });
                     } else {
-                        title.textContent = '把 ' + checked.size + ' 条搬到哪里？（当前书：' + bookName + '）';
-                        empty.textContent = targets.length === 0 ? '没有其它世界书可以放' : '没有匹配的世界书';
+                        title.textContent = 'Chuyển ' + checked.size + ' mục đến đâu? (lorebook hiện tại: ' + bookName + ')';
+                        empty.textContent = targets.length === 0 ? 'Không có lorebook nào khác để đặt vào' : 'Không có lorebook phù hợp';
                         targets.forEach((name) => {
                             const row = el('div', 'wbm-picker-row' + (selectedTarget === name ? ' active' : ''));
                             row.dataset.name = name;
@@ -1819,7 +1819,7 @@
         try {
             window.localStorage.setItem(HISTORY_KEY, JSON.stringify(out));
         } catch (err) {
-            console.warn('[wbm] 写操作历史失败', err);
+            console.warn('[wbm] Ghi lịch sử thao tác thất bại', err);
         }
     }
 
@@ -1843,21 +1843,21 @@
         const from = String(item.from || '');
         const to = String(item.to || '');
         switch (item.act) {
-            case 'move': return '移动 ' + count + ' 条：' + from + ' → ' + to;
-            case 'copy': return '复制 ' + count + ' 条：' + from + ' → ' + to;
-            case 'delete': return '删除 ' + count + ' 条：' + from;
-            case 'restore': return '恢复 ' + count + ' 条：' + from;
-            case 'recursion': return (item.on ? '开启' : '关闭') + '递归开关（不可递归+防止进一步递归）：' + count + ' 条 · ' + from;
-            case 'undo-recursion': return '撤销递归开关 ' + count + ' 条 · ' + from;
-            case 'keywords': return '关键词工具：合并追加 / 整理 ' + count + ' 条 · ' + from;
-            case 'healthfix': return '体检修复：整理关键词 ' + count + ' 条 · ' + from;
-            case 'replace': return '替换 ' + (Number(item.hits) || 0) + ' 处（' + count + ' 条）：' + from
-                + '「' + String(item.find || '').slice(0, 12) + '」→「' + String(item.repl || '').slice(0, 12) + '」';
-            case 'undo-replace': return '撤销替换 ' + count + ' 条：' + from;
-            case 'enable': return '启用世界书：' + from;
-            case 'disable': return '停用世界书：' + from;
-            case 'edit': return '编辑正文：' + from;
-            case 'undo-edit': return '撤销正文编辑：' + from;
+            case 'move': return 'Chuyển ' + count + ' mục: ' + from + ' → ' + to;
+            case 'copy': return 'Sao chép ' + count + ' mục: ' + from + ' → ' + to;
+            case 'delete': return 'Xóa ' + count + ' mục: ' + from;
+            case 'restore': return 'Khôi phục ' + count + ' mục: ' + from;
+            case 'recursion': return (item.on ? 'Bật' : 'Tắt') + ' công tắc đệ quy (Không thể đệ quy + Ngăn đệ quy thêm): ' + count + ' mục · ' + from;
+            case 'undo-recursion': return 'Hoàn tác công tắc đệ quy ' + count + ' mục · ' + from;
+            case 'keywords': return 'Công cụ từ khóa: gộp thêm / sắp xếp ' + count + ' mục · ' + from;
+            case 'healthfix': return 'Sửa lỗi kiểm tra: sắp xếp từ khóa ' + count + ' mục · ' + from;
+            case 'replace': return 'Thay thế ' + (Number(item.hits) || 0) + ' chỗ (' + count + ' mục): ' + from
+                + '“' + String(item.find || '').slice(0, 12) + '” → “' + String(item.repl || '').slice(0, 12) + '”';
+            case 'undo-replace': return 'Hoàn tác thay thế ' + count + ' mục: ' + from;
+            case 'enable': return 'Bật lorebook: ' + from;
+            case 'disable': return 'Tắt lorebook: ' + from;
+            case 'edit': return 'Sửa nội dung: ' + from;
+            case 'undo-edit': return 'Hoàn tác sửa nội dung: ' + from;
             default: return String(item.act || '');
         }
     }
@@ -1878,7 +1878,7 @@
         const book = String(record && record.from ? record.from : '');
         const payload = record && Array.isArray(record.entries) ? record.entries : [];
         if (!book || !payload.length) {
-            toast('warning', '这条记录里没有可恢复的原文');
+            toast('warning', 'Bản ghi này không có nội dung gốc để khôi phục');
             return false;
         }
         try {
@@ -1886,7 +1886,7 @@
             const { loadWorldInfo, saveWorldInfo, getFreeWorldEntryUid } = mod;
             if (typeof loadWorldInfo !== 'function' || typeof saveWorldInfo !== 'function'
                 || typeof getFreeWorldEntryUid !== 'function') {
-                toast('warning', '当前版本拿不到世界书接口，恢复失败');
+                toast('warning', 'Phiên bản hiện tại không truy cập được API lorebook, khôi phục thất bại');
                 return false;
             }
             /* loadWorldInfo 先查内存缓存：书要是在另一台设备上被删了，这边缓存里还有旧数据，
@@ -1897,7 +1897,7 @@
             const data = await loadWorldInfo(book);
             if (!data || !data.entries) {
                 markHistoryBookGone(record);
-                toast('warning', '「' + book + '」已经不在了（被删或改名），这条恢复不了');
+                toast('warning', '“' + book + '” không còn nữa (đã bị xóa hoặc đổi tên), không thể khôi phục bản ghi này');
                 return false;
             }
             let added = 0;
@@ -1916,13 +1916,13 @@
             if (typeof mod.reloadEditor === 'function') mod.reloadEditor(book);
             pushHistory({
                 act: 'restore', at: Date.now(), from: book, to: book, count: added,
-                names: payload.map((entry) => String(entry.comment || '').trim() || ('条目 ' + entry.uid)).slice(0, 5),
+                names: payload.map((entry) => String(entry.comment || '').trim() || ('Mục ' + entry.uid)).slice(0, 5),
             });
-            toast('info', '已恢复 ' + added + ' 条到「' + book + '」');
+            toast('info', 'Đã khôi phục ' + added + ' mục vào “' + book + '”');
             return true;
         } catch (err) {
-            console.error('[wbm] 恢复条目失败', err);
-            toast('warning', '恢复没有成功');
+            console.error('[wbm] Khôi phục mục thất bại', err);
+            toast('warning', 'Khôi phục không thành công');
             return false;
         }
     }
@@ -1945,7 +1945,7 @@
                 if (typeof mod.deleteWIOriginalDataValue === 'function') mod.deleteWIOriginalDataValue(data, key);
             });
             if (!removed.length) return 0;
-            const names = removed.map((entry) => String(entry.comment || '').trim() || ('条目 ' + entry.uid));
+            const names = removed.map((entry) => String(entry.comment || '').trim() || ('Mục ' + entry.uid));
             const tooBig = JSON.stringify(removed).length > HISTORY_PAYLOAD_BYTES;
             await saveWorldInfo(bookName, data, true);
             if (typeof mod.reloadEditor === 'function') mod.reloadEditor(bookName);
@@ -1957,7 +1957,7 @@
             });
             return removed.length;
         } catch (err) {
-            console.error('[wbm] 批量删除失败', err);
+            console.error('[wbm] Xóa hàng loạt thất bại', err);
             return 0;
         }
     }
@@ -1975,9 +1975,9 @@
         const used = chars >= 1024 * 1024 ? mb(chars) : Math.max(1, Math.round(chars / 1024)) + ' KB';
         const cap = mb(HISTORY_BYTES);
         const near = rows.length >= HISTORY_MAX * 0.9 || chars >= HISTORY_BYTES * 0.9;
-        return '已存 ' + rows.length + ' / ' + HISTORY_MAX + ' 条 · 占用约 ' + used
-            + '，上限 ' + cap + '（超了先淘汰最早的记录）'
-            + (near ? ' · 已接近上限' : '');
+        return 'Đã lưu ' + rows.length + ' / ' + HISTORY_MAX + ' mục · chiếm khoảng ' + used
+            + ', giới hạn ' + cap + ' (vượt quá sẽ xóa bản ghi cũ nhất trước)'
+            + (near ? ' · sắp đạt giới hạn' : '');
     }
 
     function openHistoryPicker() {
@@ -1987,16 +1987,16 @@
             state.picker = mask;
 
             const grip = el('div', 'wbm-picker-grip');
-            const { head, input } = buildPickerHead('搜索操作');
+            const { head, input } = buildPickerHead('Tìm thao tác');
             const title = el('div', 'wbm-picker-title', '');
             const usage = el('div', 'wbm-prev-meta wbm-hist-usage', '');
             const box = el('div', 'wbm-picker-list');
-            const empty = el('div', 'wbm-picker-empty', '还没有操作记录');
+            const empty = el('div', 'wbm-picker-empty', 'Chưa có lịch sử thao tác');
             const actions = el('div', 'wbm-picker-actions');
-            const clearBtn = el('button', 'wbm-picker-action', '清空历史');
+            const clearBtn = el('button', 'wbm-picker-action', 'Xóa lịch sử');
             clearBtn.type = 'button';
             clearBtn.dataset.role = 'hist-clear';
-            const closeBtn = el('button', 'wbm-picker-action primary', '关闭');
+            const closeBtn = el('button', 'wbm-picker-action primary', 'Đóng');
             closeBtn.type = 'button';
             closeBtn.dataset.role = 'hist-close';
             actions.appendChild(clearBtn);
@@ -2006,8 +2006,8 @@
                 const records = readHistory();
                 const total = records.length;
                 title.textContent = total
-                    ? '最近 ' + total + ' 条操作 · 点一条打开那本书，删除的记录可恢复'
-                    : '还没有操作记录';
+                    ? '' + total + ' thao tác gần đây · chạm vào một dòng để mở lorebook đó, các mục đã xóa có thể khôi phục'
+                    : 'Chưa có lịch sử thao tác';
                 usage.textContent = total ? historyUsageText(records) : '';
                 usage.style.display = total ? '' : 'none';
             };
@@ -2028,19 +2028,19 @@
                     const col = el('div', 'wbm-hist-col');
                     col.appendChild(el('span', 'wbm-hist-line', line));
                     const meta = [];
-                    if (names.length) meta.push(names.join('、'));
-                    if (item.act === 'delete' && item.payloadDropped) meta.push('原文过大，未保留');
-                    if (item.act === 'replace' && item.payloadDropped) meta.push('原文过大，不能撤销');
-                    if (item.bookGone) meta.push('原书已删除，只能翻看记录');
+                    if (names.length) meta.push(names.join(', '));
+                    if (item.act === 'delete' && item.payloadDropped) meta.push('Nội dung gốc quá lớn, không được lưu');
+                    if (item.act === 'replace' && item.payloadDropped) meta.push('Nội dung gốc quá lớn, không thể hoàn tác');
+                    if (item.bookGone) meta.push('Lorebook gốc đã bị xóa, chỉ có thể xem bản ghi');
                     if (meta.length) col.appendChild(el('span', 'wbm-hist-names', meta.join(' · ')));
                     row.appendChild(col);
                     if ((item.act === 'replace' || item.act === 'keywords' || item.act === 'healthfix'
                         || item.act === 'edit')
                         && Array.isArray(item.entries) && item.entries.length) {
                         if (item.bookGone) {
-                            row.appendChild(el('span', 'wbm-hist-gone', '原书已删'));
+                            row.appendChild(el('span', 'wbm-hist-gone', 'Lorebook gốc đã xóa'));
                         } else {
-                            const undoBtn = el('button', 'wbm-hist-restore', '撤销');
+                            const undoBtn = el('button', 'wbm-hist-restore', 'Hoàn tác');
                             undoBtn.type = 'button';
                             undoBtn.dataset.role = 'hist-undo-replace';
                             undoBtn.dataset.index = String(index);
@@ -2049,9 +2049,9 @@
                     }
                     if (item.act === 'recursion' && Array.isArray(item.entries) && item.entries.length) {
                         if (item.bookGone) {
-                            row.appendChild(el('span', 'wbm-hist-gone', '原书已删'));
+                            row.appendChild(el('span', 'wbm-hist-gone', 'Lorebook gốc đã xóa'));
                         } else {
-                            const undoBtn = el('button', 'wbm-hist-restore', '撤销');
+                            const undoBtn = el('button', 'wbm-hist-restore', 'Hoàn tác');
                             undoBtn.type = 'button';
                             undoBtn.dataset.role = 'hist-undo-recursion';
                             undoBtn.dataset.index = String(index);
@@ -2060,9 +2060,9 @@
                     }
                     if (item.act === 'delete' && Array.isArray(item.entries) && item.entries.length) {
                         if (item.bookGone) {
-                            row.appendChild(el('span', 'wbm-hist-gone', '原书已删'));
+                            row.appendChild(el('span', 'wbm-hist-gone', 'Lorebook gốc đã xóa'));
                         } else {
-                            const restoreBtn = el('button', 'wbm-hist-restore', '恢复');
+                            const restoreBtn = el('button', 'wbm-hist-restore', 'Khôi phục');
                             restoreBtn.type = 'button';
                             restoreBtn.dataset.role = 'hist-restore';
                             restoreBtn.dataset.index = String(index);
@@ -2072,7 +2072,7 @@
                     box.appendChild(row);
                     shown += 1;
                 });
-                empty.textContent = q ? '没有匹配的记录' : '还没有操作记录';
+                empty.textContent = q ? 'Không có bản ghi phù hợp' : 'Chưa có lịch sử thao tác';
                 empty.style.display = shown === 0 ? '' : 'none';
             };
 
@@ -2201,7 +2201,7 @@
             const mod = await import('/scripts/world-info.js');
             const { loadWorldInfo, saveWorldInfo } = mod;
             if (typeof loadWorldInfo !== 'function' || typeof saveWorldInfo !== 'function') {
-                toast('warning', '当前版本拿不到世界书接口，删除失败');
+                toast('warning', 'Phiên bản hiện tại không truy cập được API lorebook, xóa thất bại');
                 return false;
             }
             const data = await loadWorldInfo(world);
@@ -2209,7 +2209,7 @@
             const entry = data && data.entries ? data.entries[key] : null;
             if (!entry) return false;
             const copy = JSON.parse(JSON.stringify(entry));
-            const name = String(copy.comment || '').trim() || ('条目 ' + copy.uid);
+            const name = String(copy.comment || '').trim() || ('Mục ' + copy.uid);
             delete data.entries[key];
             if (typeof mod.deleteWIOriginalDataValue === 'function') mod.deleteWIOriginalDataValue(data, key);
             await saveWorldInfo(world, data, true);
@@ -2218,11 +2218,11 @@
                 act: 'delete', at: Date.now(), from: world, to: world, count: 1,
                 names: [name], entries: [copy],
             });
-            toast('info', '已删除「' + name + '」，可在「操作历史」里恢复');
+            toast('info', 'Đã xóa “' + name + '”, có thể khôi phục trong “Lịch sử thao tác”');
             return true;
         } catch (err) {
-            console.error('[wbm] 删除条目失败', err);
-            toast('warning', '删除没有成功');
+            console.error('[wbm] Xóa mục thất bại', err);
+            toast('warning', 'Xóa không thành công');
             return false;
         }
     }
@@ -2285,11 +2285,11 @@
 
     function previewMetaLine(entry, bookName) {
         const bits = [];
-        if (entry.constant) bits.push('常驻');
-        if (entry.disable) bits.push('已禁用');
+        if (entry.constant) bits.push('Hằng số');
+        if (entry.disable) bits.push('Đã vô hiệu');
         if (Number.isFinite(Number(entry.order))) bits.push('Order ' + entry.order);
         if (Number.isFinite(Number(entry.depth))) bits.push('Depth ' + entry.depth);
-        if (Number.isFinite(Number(entry.probability))) bits.push('触发 ' + entry.probability + '%');
+        if (Number.isFinite(Number(entry.probability))) bits.push('Kích hoạt ' + entry.probability + '%');
         bits.push(bookName);
         return bits.join(' · ');
     }
@@ -2297,10 +2297,10 @@
     /* 关键词三行：主要关键词 / 逻辑 / 可选过滤器。
        逻辑只有存在可选过滤器时才有意义，所以没有可选过滤器时连逻辑一起不显示。 */
     const WI_LOGIC_LABELS = [
-        { value: 0, label: 'AND ANY', hint: '可选过滤器任一命中即可' },
-        { value: 3, label: 'AND ALL', hint: '可选过滤器全部命中' },
-        { value: 1, label: 'NOT ALL', hint: '可选过滤器并非全部命中' },
-        { value: 2, label: 'NOT ANY', hint: '可选过滤器一个都没命中' },
+        { value: 0, label: 'AND ANY', hint: 'Chỉ cần khớp một bộ lọc phụ bất kỳ' },
+        { value: 3, label: 'AND ALL', hint: 'Khớp tất cả bộ lọc phụ' },
+        { value: 1, label: 'NOT ALL', hint: 'Không khớp tất cả bộ lọc phụ' },
+        { value: 2, label: 'NOT ANY', hint: 'Không khớp bộ lọc phụ nào' },
     ];
 
     function keywordArray(value) {
@@ -2313,7 +2313,7 @@
     function entryLogicLabel(entry) {
         const value = Number(entry && entry.selectiveLogic);
         const hit = WI_LOGIC_LABELS.find((item) => item.value === value) || WI_LOGIC_LABELS[0];
-        return hit.label + '（' + hit.hint + '）';
+        return hit.label + ' (' + hit.hint + ')';
     }
 
     function buildKeywordLines(entry) {
@@ -2324,19 +2324,19 @@
             const line = el('div', 'wbm-prev-kwline');
             line.appendChild(el('span', 'wbm-prev-kwlabel', label));
             if (!values.length) {
-                line.appendChild(el('span', 'wbm-prev-kwempty', '（空）'));
+                line.appendChild(el('span', 'wbm-prev-kwempty', '(trống)'));
             } else {
                 values.forEach((key) => line.appendChild(el('span', 'wbm-prev-key', key)));
             }
             box.appendChild(line);
         };
-        addLine('主要关键词', primary);
+        addLine('Từ khóa chính', primary);
         if (secondary.length) {
             const logic = el('div', 'wbm-prev-kwline');
-            logic.appendChild(el('span', 'wbm-prev-kwlabel', '逻辑'));
+            logic.appendChild(el('span', 'wbm-prev-kwlabel', 'Logic'));
             logic.appendChild(el('span', 'wbm-prev-kwvalue', entryLogicLabel(entry)));
             box.appendChild(logic);
-            addLine('可选过滤器', secondary);
+            addLine('Bộ lọc phụ', secondary);
         }
         return box;
     }
@@ -2348,7 +2348,7 @@
         const grip = el('div', 'wbm-picker-grip');
         const head = el('div', 'wbm-picker-head');
         const titleBox = el('div', 'wbm-prev-title',
-            String(entry.comment || '').trim() || ('条目 ' + entry.uid));
+            String(entry.comment || '').trim() || ('Mục ' + entry.uid));
         const close = el('button', 'wbm-picker-close', '✕');
         close.type = 'button';
         close.dataset.role = 'preview-close';
@@ -2381,16 +2381,16 @@
             if (!world || !uid) return;
             const mod = await import('/scripts/world-info.js');
             if (typeof mod.loadWorldInfo !== 'function') {
-                toast('warning', '当前版本拿不到世界书接口，预览不可用');
+                toast('warning', 'Phiên bản hiện tại không truy cập được API lorebook, không xem trước được');
                 return;
             }
             const data = await mod.loadWorldInfo(world);
             const entry = data && data.entries ? data.entries[String(uid)] : null;
-            if (!entry) { toast('warning', '取不到这条条目的内容'); return; }
+            if (!entry) { toast('warning', 'Không lấy được nội dung của mục này'); return; }
             renderPreviewSheet(world, entry);
         } catch (err) {
-            console.error('[wbm] 预览失败', err);
-            toast('warning', '预览没有成功');
+            console.error('[wbm] Xem trước thất bại', err);
+            toast('warning', 'Xem trước không thành công');
         }
     }
 
@@ -2493,14 +2493,14 @@
             const faved = favs.has(favEntryKey(world, uid));
             star.textContent = faved ? '★' : '☆';
             star.classList.toggle('on', faved);
-            star.title = faved ? '取消收藏这条条目' : '收藏这条条目';
+            star.title = faved ? 'Bỏ yêu thích mục này' : 'Yêu thích mục này';
             star.setAttribute('aria-label', star.title);
             star.dataset.uid = uid;
             star.dataset.world = world;
 
             const btn = el('i', 'menu_button wbm-preview-btn fa-solid fa-eye');
-            btn.title = '预览内容';
-            btn.setAttribute('aria-label', '预览内容');
+            btn.title = 'Xem trước nội dung';
+            btn.setAttribute('aria-label', 'Xem trước nội dung');
             btn.dataset.uid = uid;
             btn.dataset.world = world;
 
@@ -2586,7 +2586,7 @@
     }
 
     function lockChipLabel() {
-        return clickLockOn() ? '双击编辑' : '单击编辑';
+        return clickLockOn() ? 'Nhấp đúp để sửa' : 'Nhấp một lần để sửa';
     }
 
     function syncLockChip() {
@@ -2594,8 +2594,8 @@
             chip.classList.toggle('on', clickLockOn());
             chip.textContent = lockChipLabel();
             const text = clickLockOn()
-                ? '双击编辑：条目内容已锁定，单击改不动；想改就在那个字段上双击（复选框与下拉也是双击）'
-                : '单击编辑：已解除锁定，条目内容点一下就能改';
+                ? 'Nhấp đúp để sửa: nội dung mục đã khóa, nhấp một lần không sửa được; muốn sửa thì nhấp đúp vào trường đó (ô đánh dấu và menu thả xuống cũng vậy)'
+                : 'Nhấp một lần để sửa: đã mở khóa, chạm một lần là sửa được nội dung mục';
             chip.title = text;
             chip.setAttribute('aria-label', text);
         });
@@ -2712,11 +2712,11 @@
         if (bar) return bar;
         bar = el('span', 'wbm-edit-bar');
         bar.hidden = true;
-        const cancel = el('button', 'wbm-edit-btn wbm-edit-cancel', '取消');
+        const cancel = el('button', 'wbm-edit-btn wbm-edit-cancel', 'Hủy');
         cancel.type = 'button';
-        const save = el('button', 'wbm-edit-btn wbm-edit-save', '保存');
+        const save = el('button', 'wbm-edit-btn wbm-edit-save', 'Lưu');
         save.type = 'button';
-        save.title = '保存这一处改动（Ctrl+Enter）';
+        save.title = 'Lưu thay đổi này (Ctrl+Enter)';
         bar.appendChild(cancel);
         bar.appendChild(save);
         /* 位置固定一处（master 定的）：thin 控件行（展开箭头＋启用开关那一行）的末尾，
@@ -2838,7 +2838,7 @@
         if (!row || !name || !FIELD_DATA_NAME[name]) { closeFieldEditor(node, false); return; }
         if (value === before) {
             closeFieldEditor(node, false);
-            toast('info', '这一处没改动，不用保存');
+            toast('info', 'Chỗ này không có thay đổi, không cần lưu');
             return;
         }
         /* 先解锁再放行一次原生 input/change，宿主的处理器会把值写进 data、镜像并存盘 */
@@ -2848,10 +2848,10 @@
             node.dispatchEvent(new Event('input', { bubbles: true }));
             node.dispatchEvent(new Event('change', { bubbles: true }));
         } catch (err) {
-            console.warn('[wbm] 保存字段时宿主没接住', err);
+            console.warn('[wbm] SillyTavern không nhận khi lưu trường', err);
             delete row.dataset.wbmSaving;
             closeFieldEditor(node, false);
-            toast('warning', '保存没成功，这一处可能没写进去');
+            toast('warning', 'Lưu không thành công, thay đổi này có thể chưa được ghi');
             return;
         }
         delete row.dataset.wbmSaving;
@@ -2879,7 +2879,7 @@
             payloadDropped: Object.keys(beforeMap).length ? undefined : true,
             names: [label.slice(0, 20)],
         });
-        toast('info', '已保存这一处，改错了可以在操作历史里撤销');
+        toast('info', 'Đã lưu thay đổi này, nếu sửa nhầm có thể hoàn tác trong Lịch sử thao tác');
     }
 
     function toggleCheckbox(node) {
@@ -2889,9 +2889,9 @@
             if ($) $(node).trigger('input');
             else node.dispatchEvent(new Event('input', { bubbles: true }));
         } catch (err) {
-            console.warn('[wbm] 勾选没写进去', err);
+            console.warn('[wbm] Trạng thái đánh dấu chưa được ghi', err);
         }
-        toast('info', node.checked ? '已勾选（双击可再切换）' : '已取消勾选（双击可再切换）');
+        toast('info', node.checked ? 'Đã đánh dấu (nhấp đúp để đổi lại)' : 'Đã bỏ đánh dấu (nhấp đúp để đổi lại)');
     }
 
     function openSelect(node) {
@@ -2905,7 +2905,7 @@
            没有"弹出层"这一说，所以不调 showPicker，直接解锁让用户点选项 */
         if (node.multiple) {
             setTimeout(release, 20000);
-            toast('info', '已解锁：现在点选项即可勾选/取消，20 秒后自动锁定');
+            toast('info', 'Đã mở khóa: giờ chạm vào tùy chọn để đánh dấu/bỏ, tự khóa lại sau 20 giây');
             return;
         }
         /* 手机端一律用我们自己的浮层：showPicker() 弹的是浏览器/系统那套选择器，
@@ -2930,7 +2930,7 @@
             node.classList.remove('wbm-field-editing');
             if (clickLockOn()) lockControl(node);
         }, 20000);
-        toast('info', '这里已临时解锁，20 秒内可以直接选择');
+        toast('info', 'Đã tạm mở khóa, trong 20 giây có thể chọn trực tiếp');
     }
 
     function ensureContentGuard() {
@@ -3015,7 +3015,7 @@
             const now = Date.now();
             if (now - wbmHintAt > 5000) {
                 wbmHintAt = now;
-                toast('info', '条目已锁定：双击才能改');
+                toast('info', 'Mục đã khóa: nhấp đúp mới sửa được');
             }
         };
         /* 触屏上要拦两类东西，都是在 touchstart 阶段就生效了，等 mousedown 已经来晚了：
@@ -3097,7 +3097,7 @@
             try { want = new Set(JSON.parse(prev)); } catch (err) { return; }
             Array.prototype.forEach.call(sel.options, (o) => { o.selected = want.has(o.value); });
             event.stopPropagation();
-            toast('info', '条目已锁定：双击这个下拉才能改');
+            toast('info', 'Mục đã khóa: nhấp đúp vào menu này mới sửa được');
         }, true);
         /* 双击：按字段类型分流 */
         document.addEventListener('dblclick', (event) => {
@@ -3212,7 +3212,7 @@
                 const on = toggleFavEntry(world, uid, name);
                 favBtn.textContent = on ? '★' : '☆';
                 favBtn.classList.toggle('on', on);
-                favBtn.title = on ? '取消收藏这条条目' : '收藏这条条目';
+                favBtn.title = on ? 'Bỏ yêu thích mục này' : 'Yêu thích mục này';
                 return;
             }
             const btn = target.closest('.wbm-preview-btn');
@@ -3282,9 +3282,9 @@
        触发策略三档就是那个圆点下拉：🔵 常量（常驻注入）、🟢 正常（关键词命中才注入）、
        🔗 向量化（靠向量库召回，没装向量扩展基本用不到，所以很少有人见）。 */
     const ENTRY_STATE_LABELS = [
-        { value: 'constant', label: '🔵 常量' },
-        { value: 'normal', label: '🟢 正常' },
-        { value: 'vectorized', label: '🔗 向量化' },
+        { value: 'constant', label: '🔵 Hằng số' },
+        { value: 'normal', label: '🟢 Thường' },
+        { value: 'vectorized', label: '🔗 Vector hóa' },
     ];
     const entryStateFilter = new Set();
     let entryDisabledOnly = false;
@@ -3338,7 +3338,7 @@
         const chipPin = document.querySelector('.wbm-entry-favbar [data-role="entry-favpin"]');
         if (chipPin) {
             chipPin.classList.toggle('on', pinOn);
-            chipPin.textContent = pinOn ? '收藏置顶：开' : '收藏置顶：关';
+            chipPin.textContent = pinOn ? 'Ghim yêu thích: bật' : 'Ghim yêu thích: tắt';
         }
     }
 
@@ -3367,12 +3367,12 @@
     /* 现在的范围，用中文说清楚（搜索框空着时点键给一句提示，免得以为没生效） */
     function searchScopeSummary() {
         const scope = Array.isArray(store.searchScope) ? store.searchScope : SEARCH_SCOPE_VALUES;
-        if (!scope.length) return '三个面都关了，搜什么都列不出条目';
-        if (scope.length === SEARCH_SCOPE_VALUES.length) return '全部字段（等同原生）';
+        if (!scope.length) return 'Cả ba phạm vi đều tắt, tìm gì cũng không ra mục nào';
+        if (scope.length === SEARCH_SCOPE_VALUES.length) return 'Tất cả trường (giống bản gốc)';
         return scope.map((value) => {
             const hit = SEARCH_SCOPES.find((item) => item.value === value);
             return hit ? hit.label : value;
-        }).join('、');
+        }).join(', ');
     }
 
     function entryMatchesSearchScope(entry, term) {        const needle = String(term || '').toLowerCase();
@@ -3393,7 +3393,7 @@
        那一行是宿主的静态工具条，不随条目重绘，插一次就够。 */
     function buildSearchScopeBar() {
         const bar = el('div', 'wbm-search-scope');
-        bar.appendChild(el('span', 'wbm-scope-label', '搜索范围'));
+        bar.appendChild(el('span', 'wbm-scope-label', 'Phạm vi tìm'));
         const scope = Array.isArray(store.searchScope) ? store.searchScope : SEARCH_SCOPE_VALUES;
         SEARCH_SCOPES.forEach((item) => {
             const on = scope.indexOf(item.value) !== -1;
@@ -3401,7 +3401,7 @@
             chip.type = 'button';
             chip.dataset.role = 'search-scope-' + item.value;
             chip.dataset.scope = item.value;
-            chip.title = '条目搜索只在「' + item.hint + '」里找；三个全关＝搜什么都列不出条目';
+            chip.title = 'Tìm mục chỉ trong “' + item.hint + '”; tắt cả ba = tìm gì cũng không ra mục nào';
             chip.setAttribute('aria-pressed', on ? 'true' : 'false');
             chip.addEventListener('click', (event) => {
                 event.preventDefault();
@@ -3454,8 +3454,8 @@
             btn = el('button', 'menu_button wbm-cat-btn');
             btn.type = 'button';
             btn.dataset.role = 'category-open';
-            btn.title = '世界书分类：按来源挑一本书来编辑';
-            btn.setAttribute('aria-label', '世界书分类');
+            btn.title = 'Phân loại lorebook: chọn lorebook để sửa theo nguồn';
+            btn.setAttribute('aria-label', 'Phân loại lorebook');
             btn.appendChild(el('i', 'fa-solid fa-layer-group'));
             const activate = (event) => {
                 event.preventDefault();
@@ -3504,14 +3504,14 @@
        角色卡 > 附加 > 人设 > 聊天 > 全局；一处都没命中的才算「未绑定」。 */
 
     const CAT_GROUPS = [
-        { key: 'character', title: '角色卡世界书' },
-        { key: 'extra', title: '附加世界书' },
-        { key: 'persona', title: '人设世界书' },
-        { key: 'chat', title: '聊天世界书' },
-        { key: 'global', title: '全局世界书' },
+        { key: 'character', title: 'Lorebook thẻ nhân vật' },
+        { key: 'extra', title: 'Lorebook bổ sung' },
+        { key: 'persona', title: 'Lorebook persona' },
+        { key: 'chat', title: 'Lorebook chat' },
+        { key: 'global', title: 'Lorebook toàn cục' },
     ];
-    const CAT_NOTE = '一本书只归一处：同时被多处引用时，按 角色卡 → 附加 → 人设 → 聊天 → 全局 取靠前那一处。';
-    const CAT_DOT_NOTE = '名字后面的小圆点＝这本书在别处还被引用（不一定是全局）。';
+    const CAT_NOTE = 'Mỗi lorebook chỉ thuộc một nhóm: khi được tham chiếu ở nhiều nơi, lấy nơi đứng trước theo thứ tự Thẻ nhân vật → Bổ sung → Persona → Chat → Toàn cục.';
+    const CAT_DOT_NOTE = 'Chấm nhỏ sau tên = lorebook này còn được tham chiếu ở nơi khác (không nhất thiết là toàn cục).';
 
     function nameKey(s) {
         return String(s || '').trim().toLowerCase();
@@ -3608,7 +3608,7 @@
         row.appendChild(el('span', 'wbm-picker-name', book.name));
         if (book.extra > 0) {
             const dot = el('span', 'wbm-cat-dot');
-            dot.title = '这本书还在别处被引用';
+            dot.title = 'Lorebook này còn được tham chiếu ở nơi khác';
             row.appendChild(dot);
         }
         if (option.checkbox) {
@@ -3634,19 +3634,19 @@
     function catScanBar() {
         const bar = el('div', 'wbm-cat-scanbar');
         if (state.catScanning) {
-            bar.appendChild(el('span', 'wbm-cat-scanstate', '正在扫描全部聊天…… 数据多时要等一会儿，先别关窗'));
+            bar.appendChild(el('span', 'wbm-cat-scanstate', 'Đang quét tất cả cuộc chat… nhiều dữ liệu sẽ mất một lúc, đừng đóng cửa sổ'));
             return bar;
         }
         if (store.catChatAt) {
             const at = new Date(Number(store.catChatAt));
             const pad = (n) => (n < 10 ? '0' + n : String(n));
             bar.appendChild(el('span', 'wbm-cat-scanstate',
-                '已扫描 ' + Number(store.catChatCount) + ' 个聊天，找到 ' + store.catChatBooks.length + ' 本 · '
+                'Đã quét ' + Number(store.catChatCount) + ' cuộc chat, tìm thấy ' + store.catChatBooks.length + ' cuốn · '
                 + (at.getMonth() + 1) + '-' + pad(at.getDate()) + ' ' + pad(at.getHours()) + ':' + pad(at.getMinutes())));
         } else {
-            bar.appendChild(el('span', 'wbm-cat-scanstate', '聊天绑定要扫过全部聊天才知道，点右边按钮开始'));
+            bar.appendChild(el('span', 'wbm-cat-scanstate', 'Cần quét tất cả cuộc chat mới biết lorebook gắn với chat, chạm nút bên phải để bắt đầu'));
         }
-        const btn = el('button', 'menu_button wbm-chip wbm-chip-sm', store.catChatAt ? '重新扫描' : '扫描全部聊天');
+        const btn = el('button', 'menu_button wbm-chip wbm-chip-sm', store.catChatAt ? 'Quét lại' : 'Quét tất cả chat');
         btn.type = 'button';
         btn.dataset.role = 'cat-scan';
         bar.appendChild(btn);
@@ -3657,20 +3657,20 @@
         const bar = el('div', 'wbm-cat-scanbar');
         if (state.catCharScanning) {
             bar.appendChild(el('span', 'wbm-cat-scanstate',
-                '正在读取角色卡绑定 ' + state.catCharDone + ' / ' + state.catCharTotal + '，可以先看别的组'));
+                'Đang đọc liên kết thẻ nhân vật ' + state.catCharDone + ' / ' + state.catCharTotal + ', có thể xem nhóm khác trước'));
             return bar;
         }
         if (store.catCharAt) {
             const at = new Date(Number(store.catCharAt));
             const pad = (n) => (n < 10 ? '0' + n : String(n));
             bar.appendChild(el('span', 'wbm-cat-scanstate',
-                '已读 ' + Number(store.catCharCount) + ' 张卡，找到 ' + store.catCharBooks.length + ' 本绑定 · '
+                'Đã đọc ' + Number(store.catCharCount) + ' thẻ, tìm thấy ' + store.catCharBooks.length + ' cuốn được gắn · '
                 + (at.getMonth() + 1) + '-' + pad(at.getDate()) + ' ' + pad(at.getHours()) + ':' + pad(at.getMinutes())));
         } else {
             bar.appendChild(el('span', 'wbm-cat-scanstate',
-                '酒馆给的卡表是浅数据（只有名字和标签），角色卡绑了哪本书必须逐张打开才知道'));
+                'Danh sách thẻ SillyTavern cung cấp chỉ có dữ liệu sơ lược (tên và thẻ tag), phải mở từng thẻ mới biết thẻ nhân vật gắn lorebook nào'));
         }
-        const btn = el('button', 'menu_button wbm-chip wbm-chip-sm', store.catCharAt ? '重新读取' : '读取全部角色卡');
+        const btn = el('button', 'menu_button wbm-chip wbm-chip-sm', store.catCharAt ? 'Đọc lại' : 'Đọc tất cả thẻ nhân vật');
         btn.type = 'button';
         btn.dataset.role = 'cat-scan-char';
         bar.appendChild(btn);
@@ -3682,23 +3682,23 @@
         const confirming = !!state.catConfirm;
         const bar = el('div', 'wbm-cat-delbar');
         bar.appendChild(el('span', 'wbm-cat-del-label', confirming
-            ? '确认删除这 ' + n + ' 本？删的是磁盘文件，不可撤销'
-            : '已选 ' + n + ' 本'));
-        const all = el('button', 'menu_button wbm-chip wbm-chip-sm', '全选 ' + books.length + ' 本');
+            ? 'Xác nhận xóa ' + n + ' cuốn này? Sẽ xóa tệp trên đĩa, không thể hoàn tác'
+            : 'Đã chọn ' + n + ' cuốn'));
+        const all = el('button', 'menu_button wbm-chip wbm-chip-sm', 'Chọn tất cả ' + books.length + ' cuốn');
         all.type = 'button';
         all.dataset.role = 'cat-check-all';
         bar.appendChild(all);
-        const clear = el('button', 'menu_button wbm-chip wbm-chip-sm', '清空');
+        const clear = el('button', 'menu_button wbm-chip wbm-chip-sm', 'Bỏ chọn');
         clear.type = 'button';
         clear.dataset.role = 'cat-check-clear';
         bar.appendChild(clear);
-        const cancel = el('button', 'menu_button wbm-chip wbm-chip-sm', '取消');
+        const cancel = el('button', 'menu_button wbm-chip wbm-chip-sm', 'Hủy');
         cancel.type = 'button';
         cancel.dataset.role = 'cat-del-cancel';
         cancel.hidden = !confirming;
         bar.appendChild(cancel);
         const go = el('button', 'menu_button wbm-chip wbm-chip-sm redWarningBG',
-            confirming ? '删除 ' + n + ' 本' : '删除所选');
+            confirming ? 'Xóa ' + n + ' cuốn' : 'Xóa các cuốn đã chọn');
         go.type = 'button';
         go.dataset.role = 'cat-del-go';
         go.disabled = n === 0;
@@ -3716,16 +3716,16 @@
         head.appendChild(el('span', 'wbm-cat-group-title', group.title));
         head.appendChild(el('span', 'wbm-picker-group-count', String(group.books.length)));
         const cross = group.books.filter((b) => b && b.extra > 0).length;
-        if (cross > 0) head.appendChild(el('span', 'wbm-cat-cross', cross + ' 本另有绑定'));
+        if (cross > 0) head.appendChild(el('span', 'wbm-cat-cross', cross + ' cuốn có liên kết khác'));
         if (group.key === 'chat' && !store.catChatAt) {
-            head.appendChild(el('span', 'wbm-cat-scanhint', '未扫描 · 点这里'));
+            head.appendChild(el('span', 'wbm-cat-scanhint', 'Chưa quét · chạm vào đây'));
         }
         if (group.key === 'character') {
             if (state.catCharScanning) {
                 head.appendChild(el('span', 'wbm-cat-scanhint',
-                    '读取中 ' + state.catCharDone + ' / ' + state.catCharTotal));
+                    'Đang đọc ' + state.catCharDone + ' / ' + state.catCharTotal));
             } else if (!store.catCharAt) {
-                head.appendChild(el('span', 'wbm-cat-scanhint', '未扫描 · 点这里'));
+                head.appendChild(el('span', 'wbm-cat-scanhint', 'Chưa quét · chạm vào đây'));
             }
         }
         wrap.appendChild(head);
@@ -3742,7 +3742,7 @@
             checked: isUnbound && picked.has(b.name),
         })));
         if (!group.books.length) {
-            list.appendChild(el('div', 'wbm-none', isUnbound ? '没有未绑定的世界书' : '这一组现在是 0 本'));
+            list.appendChild(el('div', 'wbm-none', isUnbound ? 'Không có lorebook chưa gắn' : 'Nhóm này hiện có 0 cuốn'));
         }
         wrap.appendChild(list);
         if (isUnbound) wrap.appendChild(catDeleteBar(group.books));
@@ -3809,8 +3809,8 @@
             await Promise.all(Array.from({ length: conc }, () => worker()));
             state.titleIndex = index;
         } catch (err) {
-            console.warn('[wbm] 建立条目标题索引失败', err);
-            toast('error', '读取条目失败：' + (err && err.message ? err.message : err));
+            console.warn('[wbm] Tạo chỉ mục tiêu đề mục thất bại', err);
+            toast('error', 'Đọc mục thất bại: ' + (err && err.message ? err.message : err));
         } finally {
             state.titleIndexBuilding = false;
             renderCategoryPanel();
@@ -3840,12 +3840,12 @@
         /* 条目标题模式下还没建好索引：先报进度，别让人以为搜不到 */
         if (searching && state.catMode === 'title' && !state.titleIndex) {
             body.appendChild(el('div', 'wbm-cat-note wbm-cat-warn', state.titleIndexBuilding
-                ? '正在读取全部条目的标题 ' + state.titleDone + ' / ' + state.titleTotal + '，读完才会出结果。'
-                : '按条目标题搜索要先把所有书的条目读一遍。'));
+                ? 'Đang đọc tiêu đề của tất cả mục ' + state.titleDone + ' / ' + state.titleTotal + ', đọc xong mới có kết quả.'
+                : 'Tìm theo tiêu đề mục cần đọc qua tất cả mục của mọi lorebook trước.'));
         }
 
         const secBound = el('div', 'wbm-cat-sect');
-        secBound.appendChild(catSectHead('绑定中', boundCount));
+        secBound.appendChild(catSectHead('Đang gắn', boundCount));
         if (!searching) {
             secBound.appendChild(el('div', 'wbm-cat-note', CAT_NOTE));
             secBound.appendChild(el('div', 'wbm-cat-note', CAT_DOT_NOTE));
@@ -3854,27 +3854,27 @@
         body.appendChild(secBound);
 
         const secFree = el('div', 'wbm-cat-sect');
-        secFree.appendChild(catSectHead('未绑定', unboundFiltered.length));
+        secFree.appendChild(catSectHead('Chưa gắn', unboundFiltered.length));
         if (!searching) {
             /* 角色卡还没扫过时这里的数字一定偏大，明说一句，别让人以为分类不准 */
             if (!store.catCharAt) {
                 secFree.appendChild(el('div', 'wbm-cat-note wbm-cat-warn',
                     state.catCharScanning
-                        ? '正在读取角色卡绑定（' + state.catCharDone + ' / ' + state.catCharTotal + '），读完这里的数字才会准。'
-                        : '角色卡绑定还没扫描，这里可能混进已绑定到角色卡的书；点「角色卡世界书」扫一次即可。'));
+                        ? 'Đang đọc liên kết thẻ nhân vật (' + state.catCharDone + ' / ' + state.catCharTotal + '), đọc xong thì số liệu ở đây mới chính xác.'
+                        : 'Chưa quét liên kết thẻ nhân vật, ở đây có thể lẫn lorebook đã gắn với thẻ nhân vật; chạm “Lorebook thẻ nhân vật” để quét một lần.'));
             }
             /* 聊天同理：没扫过就不知道有没有书只被某个聊天绑着 */
             if (!store.catChatAt) {
                 secFree.appendChild(el('div', 'wbm-cat-note wbm-cat-warn',
-                    '还没做过「聊天世界书」扫描，这里可能混进只被某个聊天绑定的书。'));
+                    'Chưa quét “Lorebook chat”, ở đây có thể lẫn lorebook chỉ được gắn với một cuộc chat nào đó.'));
             }
         }
-        secFree.appendChild(catGroup({ key: 'unbound', title: '未被引用', books: unboundFiltered }, current, true));
+        secFree.appendChild(catGroup({ key: 'unbound', title: 'Không được tham chiếu', books: unboundFiltered }, current, true));
         body.appendChild(secFree);
 
 
         if (searching && boundCount === 0 && unboundFiltered.length === 0 && (state.catMode !== 'title' || state.titleIndex)) {
-            body.appendChild(el('div', 'wbm-none', '没有匹配的世界书'));
+            body.appendChild(el('div', 'wbm-none', 'Không có lorebook phù hợp'));
         }
     }
 
@@ -3886,12 +3886,12 @@
         const label = bar.querySelector('.wbm-cat-del-label');
         if (label) {
             label.textContent = confirming
-                ? '确认删除这 ' + n + ' 本？删的是磁盘文件，不可撤销'
-                : '已选 ' + n + ' 本';
+                ? 'Xác nhận xóa ' + n + ' cuốn này? Sẽ xóa tệp trên đĩa, không thể hoàn tác'
+                : 'Đã chọn ' + n + ' cuốn';
         }
         const go = bar.querySelector('[data-role="cat-del-go"]');
         if (go) {
-            go.textContent = confirming ? '删除 ' + n + ' 本' : '删除所选';
+            go.textContent = confirming ? 'Xóa ' + n + ' cuốn' : 'Xóa các cuốn đã chọn';
             go.disabled = n === 0;
         }
         const cancel = bar.querySelector('[data-role="cat-del-cancel"]');
@@ -3960,10 +3960,10 @@
             store.catCharAt = Date.now();
             store.catCharCount = list.length;
             persistStore();
-            toast('info', '角色卡读取完成：' + list.length + ' 张卡，' + books.size + ' 本被角色卡绑定');
+            toast('info', 'Đọc thẻ nhân vật xong: ' + list.length + ' thẻ, ' + books.size + ' cuốn được gắn với thẻ nhân vật');
         } catch (err) {
-            console.warn('[wbm] 读取角色卡绑定失败', err);
-            toast('error', '读取角色卡失败：' + (err && err.message ? err.message : err));
+            console.warn('[wbm] Đọc liên kết thẻ nhân vật thất bại', err);
+            toast('error', 'Đọc thẻ nhân vật thất bại: ' + (err && err.message ? err.message : err));
         } finally {
             state.catCharScanning = false;
             renderCategoryPanel();
@@ -3998,11 +3998,11 @@
             state.catScanning = false;
             state.catOpen = 'chat';
             renderCategoryPanel();
-            toast('info', '扫描完成：' + store.catChatCount + ' 个聊天，找到 ' + books.size + ' 本被聊天绑定的世界书');
+            toast('info', 'Quét xong: ' + store.catChatCount + ' cuộc chat, tìm thấy ' + books.size + ' lorebook được gắn với chat');
         } catch (err) {
             state.catScanning = false;
             renderCategoryPanel();
-            toast('error', '扫描失败：' + (err && err.message ? err.message : err));
+            toast('error', 'Quét thất bại: ' + (err && err.message ? err.message : err));
         }
     }
 
@@ -4028,14 +4028,14 @@
                 else fail += 1;
             }
         } catch (err) {
-            console.error('[wbm] 批量删除失败', err);
+            console.error('[wbm] Xóa hàng loạt thất bại', err);
             fail = names.length;
         } finally {
             state.catDeleting = false;
             catSel().clear();
             state.catConfirm = 0;
         }
-        toast(fail ? 'warning' : 'info', '删除完成：成功 ' + ok + ' 本' + (fail ? '，失败 ' + fail + ' 本' : ''));
+        toast(fail ? 'warning' : 'info', 'Xóa xong: thành công ' + ok + ' cuốn' + (fail ? ', thất bại ' + fail + ' cuốn' : ''));
         setTimeout(renderCategoryPanel, 400);
     }
 
@@ -4081,8 +4081,8 @@
     function nextPresetName() {
         const used = new Set(store.presets.map((p) => p.name));
         let n = 1;
-        while (used.has('预设' + n)) n += 1;
-        return '预设' + n;
+        while (used.has('Preset ' + n)) n += 1;
+        return 'Preset ' + n;
     }
 
     function currentGlobalBooks() {
@@ -4136,14 +4136,14 @@
         if (existing) {
             existing.books = books;
             persistPresets();
-            toast('info', '已覆盖「' + name + '」：启用 ' + books.length + ' 本');
+            toast('info', 'Đã ghi đè “' + name + '”: bật ' + books.length + ' cuốn');
             renderCategoryPanel();
             return existing;
         }
         const preset = { id: 'p' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name: name, books: books };
         store.presets.push(preset);
         persistPresets();
-        toast('info', '已存为「' + name + '」：启用 ' + books.length + ' 本');
+        toast('info', 'Đã lưu thành “' + name + '”: bật ' + books.length + ' cuốn');
         renderCategoryPanel();
         return preset;
     }
@@ -4152,10 +4152,10 @@
         const preset = presetById(id);
         if (!preset) return;
         const result = applyGlobalBooks(preset.books);
-        let text = '已套用「' + preset.name + '」：启用 ' + result.applied + ' 本';
+        let text = 'Đã áp dụng “' + preset.name + '”: bật ' + result.applied + ' cuốn';
         if (result.missing.length) {
-            text += '（' + result.missing.length + ' 本已不在书库，跳过：' + result.missing.slice(0, 3).join('、')
-                + (result.missing.length > 3 ? '…' : '') + '）';
+            text += ' (' + result.missing.length + ' cuốn không còn trong thư viện, bỏ qua: ' + result.missing.slice(0, 3).join(', ')
+                + (result.missing.length > 3 ? '…' : '') + ')';
         }
         toast(result.missing.length ? 'warning' : 'info', text);
         refreshPresetBar();
@@ -4167,7 +4167,7 @@
         if (!preset) return;
         preset.books = currentGlobalBooks();
         persistPresets();
-        toast('info', '已用当前清单覆盖「' + preset.name + '」：启用 ' + preset.books.length + ' 本');
+        toast('info', 'Đã ghi đè bằng danh sách hiện tại vào “' + preset.name + '”: bật ' + preset.books.length + ' cuốn');
         renderCategoryPanel();
     }
 
@@ -4175,10 +4175,10 @@
         const preset = presetById(id);
         if (!preset) return false;
         const name = String(rawName || '').trim().slice(0, 40);
-        if (!name) { toast('error', '名字不能为空'); return false; }
+        if (!name) { toast('error', 'Tên không được để trống'); return false; }
         if (name === preset.name) return true;
         if (store.presets.some((p) => p !== preset && p.name === name)) {
-            toast('error', '已经有叫「' + name + '」的预设了');
+            toast('error', 'Tên “' + name + '” đã được dùng cho một preset khác');
             return false;
         }
         preset.name = name;
@@ -4192,7 +4192,7 @@
         if (!preset) return;
         store.presets = store.presets.filter((p) => p.id !== id);
         persistPresets();
-        toast('info', '已删除预设「' + preset.name + '」（不影响当前启用的书）');
+        toast('info', 'Đã xóa preset “' + preset.name + '” (không ảnh hưởng các lorebook đang bật)');
         renderCategoryPanel();
     }
 
@@ -4206,7 +4206,7 @@
         const active = presetForBooks(books);
         /* 第一次装配时，若当前清单本来就不属于任何预设，就把它当作「自定义」那套记下来 */
         if (!store.customBooks.length && books.length && !active) rememberCustomBooks(books);
-        btnText.textContent = active ? active.name : '自定义';
+        btnText.textContent = active ? active.name : 'Tùy chỉnh';
         row.classList.toggle('wbm-preset-dirty', !active);
         const saveRow = row.querySelector('.wbm-preset-saverow');
         if (saveRow) saveRow.hidden = !state.presetSaving;
@@ -4225,20 +4225,20 @@
 
         const row = el('div', 'wbm-preset-row');
         row.dataset.role = 'preset-row';
-        row.appendChild(el('span', 'wbm-favbar-label', '全局世界书预设'));
+        row.appendChild(el('span', 'wbm-favbar-label', 'Preset lorebook toàn cục'));
         /* 这里不放进原生 <select>：系统选择器给选项文字换不了字体、也摆不到右侧，
            改成"看起来像下拉"的按钮，点开是我们自己的浮层列表。 */
         const pickBtn = el('button', 'menu_button wbm-preset-btn');
         pickBtn.type = 'button';
         pickBtn.dataset.role = 'preset-open';
-        pickBtn.title = '选一套预设，把它存的那几本全局世界书整套启用';
-        pickBtn.appendChild(el('span', 'wbm-preset-btn-text', '自定义（未套用预设）'));
+        pickBtn.title = 'Chọn một preset để bật toàn bộ các lorebook toàn cục được lưu trong đó';
+        pickBtn.appendChild(el('span', 'wbm-preset-btn-text', 'Tùy chỉnh (chưa áp dụng preset)'));
         pickBtn.appendChild(el('span', 'wbm-preset-caret'));
         row.appendChild(pickBtn);
-        const saveBtn = el('button', 'menu_button wbm-chip wbm-preset-save', '存为预设');
+        const saveBtn = el('button', 'menu_button wbm-chip wbm-preset-save', 'Lưu thành preset');
         saveBtn.type = 'button';
         saveBtn.dataset.role = 'preset-save';
-        saveBtn.title = '把当前启用的这几本存成一套预设';
+        saveBtn.title = 'Lưu các lorebook đang bật thành một preset';
         row.appendChild(saveBtn);
 
         /* 存名字的小行：空着不填就用"预设N" */
@@ -4250,11 +4250,11 @@
         nameInput.dataset.role = 'preset-name';
         nameInput.maxLength = 40;
         saveRow.appendChild(nameInput);
-        const okBtn = el('button', 'menu_button wbm-chip wbm-chip-sm', '保存');
+        const okBtn = el('button', 'menu_button wbm-chip wbm-chip-sm', 'Lưu');
         okBtn.type = 'button';
         okBtn.dataset.role = 'preset-save-ok';
         saveRow.appendChild(okBtn);
-        const cancelBtn = el('button', 'menu_button wbm-chip wbm-chip-sm', '取消');
+        const cancelBtn = el('button', 'menu_button wbm-chip wbm-chip-sm', 'Hủy');
         cancelBtn.type = 'button';
         cancelBtn.dataset.role = 'preset-save-cancel';
         saveRow.appendChild(cancelBtn);
@@ -4329,9 +4329,9 @@
         /* 空的一套照样能套用：那就等于不启用任何全局世界书 */
         const result = applyGlobalBooks(books);
         let text = books.length
-            ? '已套用「自定义」：启用 ' + result.applied + ' 本'
-            : '已套用「自定义」（空）：全局世界书全部停用';
-        if (result.missing.length) text += '（' + result.missing.length + ' 本已不在书库，跳过）';
+            ? 'Đã áp dụng “Tùy chỉnh”: bật ' + result.applied + ' cuốn'
+            : 'Đã áp dụng “Tùy chỉnh” (trống): tắt toàn bộ lorebook toàn cục';
+        if (result.missing.length) text += ' (' + result.missing.length + ' cuốn không còn trong thư viện, đã bỏ qua)';
         toast(result.missing.length ? 'warning' : 'info', text);
         refreshPresetBar();
         renderCategoryPanel();
@@ -4351,7 +4351,7 @@
             const { mask, sheet } = makePickerShell();
             state.picker = mask;
             sheet.appendChild(el('div', 'wbm-picker-grip'));
-            sheet.appendChild(el('div', 'wbm-picker-title', '全局世界书预设'));
+            sheet.appendChild(el('div', 'wbm-picker-title', 'Preset lorebook toàn cục'));
             const list = el('div', 'wbm-picker-list');
             const books = currentGlobalBooks();
             const active = presetForBooks(books);
@@ -4373,27 +4373,27 @@
                    手机端由 CSS 把这一整格挪到第二行靠右，名字在第一行用满宽度 */
                 if (id && id !== 'custom') {
                     const tools = el('div', 'wbm-preset-tools');
-                    tools.appendChild(mkTool('分组', 'preset-move', id));
-                    tools.appendChild(mkTool('改名', 'preset-rename-inline', id));
+                    tools.appendChild(mkTool('Nhóm', 'preset-move', id));
+                    tools.appendChild(mkTool('Đổi tên', 'preset-rename-inline', id));
                     const over = state.presetOverArm === id;
-                    tools.appendChild(mkTool(over ? '确认覆盖' : '覆盖', 'preset-over-inline', id, over ? ' armed' : ''));
+                    tools.appendChild(mkTool(over ? 'Xác nhận ghi đè' : 'Ghi đè', 'preset-over-inline', id, over ? ' armed' : ''));
                     const armed = state.presetDelArm === id;
-                    tools.appendChild(mkTool(armed ? '确认' : '删除', 'preset-del-inline', id, armed ? ' armed' : ''));
+                    tools.appendChild(mkTool(armed ? 'Xác nhận' : 'Xóa', 'preset-del-inline', id, armed ? ' armed' : ''));
                     row.appendChild(tools);
                 }
-                row.appendChild(el('span', 'wbm-picker-count', count + ' 本'));
+                row.appendChild(el('span', 'wbm-picker-count', count + ' cuốn'));
                 row.appendChild(el('span', 'wbm-picker-radio'));
                 return row;
             };
             const mkLabel = (text) => el('div', 'wbm-picker-group-label', text);
 
-            list.appendChild(mkRow('custom', '自定义', customBooks.length, !active));
+            list.appendChild(mkRow('custom', 'Tùy chỉnh', customBooks.length, !active));
             if (!store.presets.length) {
-                list.appendChild(el('div', 'wbm-none', '还没有预设：关掉窗口，点右边「存为预设」存一套。'));
+                list.appendChild(el('div', 'wbm-none', 'Chưa có preset: đóng cửa sổ, chạm “Lưu thành preset” bên phải để lưu một bộ.'));
             }
             const ungrouped = store.presets.filter((preset) => !preset.groupId);
             if (ungrouped.length) {
-                list.appendChild(mkLabel('未分组'));
+                list.appendChild(mkLabel('Chưa phân nhóm'));
                 ungrouped.forEach((preset) => {
                     list.appendChild(mkRow(preset.id, preset.name, preset.books.length, !!(active && active.id === preset.id)));
                 });
@@ -4434,7 +4434,7 @@
                     const id = overBtn.dataset.id;
                     if (state.presetOverArm !== id) {
                         state.presetOverArm = id;
-                        overBtn.textContent = '确认覆盖';
+                        overBtn.textContent = 'Xác nhận ghi đè';
                         overBtn.classList.add('armed');
                         return;
                     }
@@ -4450,7 +4450,7 @@
                     const id = delBtn.dataset.id;
                     if (state.presetDelArm !== id) {
                         state.presetDelArm = id;
-                        delBtn.textContent = '确认';
+                        delBtn.textContent = 'Xác nhận';
                         delBtn.classList.add('armed');
                         return;
                     }
@@ -4475,7 +4475,7 @@
             });
             document.documentElement.appendChild(mask);
         } catch (err) {
-            console.warn('[wbm] 打开预设浮层失败', err);
+            console.warn('[wbm] Mở cửa sổ preset thất bại', err);
         }
     }
 
@@ -4497,7 +4497,7 @@
 
     function groupNameOf(gid) {
         const group = gid ? groupById(gid) : null;
-        return group ? group.name : '未分组';
+        return group ? group.name : 'Chưa phân nhóm';
     }
 
     function createGroup(rawName) {
@@ -4516,7 +4516,7 @@
         if (!preset) return;
         preset.groupId = gid || '';
         persistPresets();
-        toast('info', '「' + preset.name + '」已移到「' + groupNameOf(preset.groupId) + '」');
+        toast('info', '“' + preset.name + '” đã chuyển sang “' + groupNameOf(preset.groupId) + '”');
         renderCategoryPanel();
     }
 
@@ -4524,9 +4524,9 @@
         const group = groupById(gid);
         if (!group) return false;
         const name = String(rawName || '').trim().slice(0, 30);
-        if (!name) { toast('error', '组名不能为空'); return false; }
+        if (!name) { toast('error', 'Tên nhóm không được để trống'); return false; }
         if (store.presetGroups.some((g) => g !== group && g.name === name)) {
-            toast('error', '已经有叫「' + name + '」的分组了');
+            toast('error', 'Tên “' + name + '” đã được dùng cho một nhóm khác');
             return false;
         }
         group.name = name;
@@ -4542,7 +4542,7 @@
         store.presets.forEach((p) => { if (p.groupId === gid) p.groupId = ''; });
         store.presetGroups = store.presetGroups.filter((g) => g.id !== gid);
         persistPresets();
-        toast('info', '已删除分组「' + group.name + '」（组里的预设回到未分组）');
+        toast('info', 'Đã xóa nhóm “' + group.name + '” (các preset trong nhóm trở về Chưa phân nhóm)');
         renderCategoryPanel();
     }
 
@@ -4555,7 +4555,7 @@
             const { mask, sheet } = makePickerShell();
             state.picker = mask;
             sheet.appendChild(el('div', 'wbm-picker-grip'));
-            sheet.appendChild(el('div', 'wbm-picker-title', '重命名预设'));
+            sheet.appendChild(el('div', 'wbm-picker-title', 'Đổi tên preset'));
             const box = el('div', 'wbm-preset-saverow wbm-group-new');
             const input = document.createElement('input');
             input.className = 'text_pole wbm-preset-name';
@@ -4564,11 +4564,11 @@
             input.value = preset.name;
             input.dataset.role = 'preset-rename-field';
             box.appendChild(input);
-            const ok = el('button', 'menu_button wbm-chip wbm-chip-sm', '保存');
+            const ok = el('button', 'menu_button wbm-chip wbm-chip-sm', 'Lưu');
             ok.type = 'button';
             ok.dataset.role = 'preset-rename-save';
             box.appendChild(ok);
-            const cancel = el('button', 'menu_button wbm-chip wbm-chip-sm', '取消');
+            const cancel = el('button', 'menu_button wbm-chip wbm-chip-sm', 'Hủy');
             cancel.type = 'button';
             cancel.dataset.role = 'preset-rename-cancel2';
             box.appendChild(cancel);
@@ -4576,7 +4576,7 @@
             const save = () => {
                 if (presetRename(preset.id, input.value)) {
                     closeEditorPicker();
-                    toast('info', '已改名为「' + preset.name + '」');
+                    toast('info', 'Đã đổi tên thành “' + preset.name + '”');
                 }
             };
             box.addEventListener('click', (event) => {
@@ -4604,7 +4604,7 @@
             input.focus();
             input.select();
         } catch (err) {
-            console.warn('[wbm] 打开改名浮层失败', err);
+            console.warn('[wbm] Mở cửa sổ đổi tên thất bại', err);
         }
     }
 
@@ -4625,7 +4625,7 @@
                 setTimeout(() => mask.remove(), 190);
             };
             sheet.appendChild(el('div', 'wbm-picker-grip'));
-            sheet.appendChild(el('div', 'wbm-picker-title', preset ? '「' + preset.name + '」放到哪个分组' : '分组管理'));
+            sheet.appendChild(el('div', 'wbm-picker-title', preset ? '“' + preset.name + '” — đưa vào nhóm nào?' : 'Quản lý nhóm'));
 
             const list = el('div', 'wbm-picker-list');
             const rebuild = () => {
@@ -4642,13 +4642,13 @@
                     row.appendChild(el('span', 'wbm-picker-radio'));
                     return row;
                 };
-                list.appendChild(mkRow('', '不分组', !preset.groupId));
+                list.appendChild(mkRow('', 'Không phân nhóm', !preset.groupId));
                 store.presetGroups.forEach((group) => {
                     const count = store.presets.filter((p) => p.groupId === group.id).length;
-                    list.appendChild(mkRow(group.id, group.name + '（' + count + ' 套）', preset.groupId === group.id));
+                    list.appendChild(mkRow(group.id, group.name + ' (' + count + ' preset)', preset.groupId === group.id));
                 });
             } else if (!store.presetGroups.length) {
-                list.appendChild(el('div', 'wbm-none', '还没有分组：在下面起个名字新建一组。'));
+                list.appendChild(el('div', 'wbm-none', 'Chưa có nhóm: đặt tên ở bên dưới để tạo nhóm mới.'));
             }
 
             /* 分组管理行：组名 + 改名/删除（分组浮层里才有意义，单独进来时也一样） */
@@ -4657,15 +4657,15 @@
                 const row = el('div', 'wbm-group-mgmt-row');
                 row.dataset.gid = group.id;
                 const count = store.presets.filter((p) => p.groupId === group.id).length;
-                row.appendChild(el('span', 'wbm-group-mgmt-name', group.name + '（' + count + ' 套）'));
+                row.appendChild(el('span', 'wbm-group-mgmt-name', group.name + ' (' + count + ' preset)'));
                 const tools = el('span', 'wbm-group-mgmt-tools');
-                const renameBtn = el('button', 'wbm-preset-tool', '改名');
+                const renameBtn = el('button', 'wbm-preset-tool', 'Đổi tên');
                 renameBtn.type = 'button';
                 renameBtn.dataset.role = 'group-rename';
                 renameBtn.dataset.gid = group.id;
                 tools.appendChild(renameBtn);
                 const armed = state.groupDelArm === group.id;
-                const delBtn = el('button', 'wbm-preset-tool' + (armed ? ' armed' : ''), armed ? '确认' : '删除');
+                const delBtn = el('button', 'wbm-preset-tool' + (armed ? ' armed' : ''), armed ? 'Xác nhận' : 'Xóa');
                 delBtn.type = 'button';
                 delBtn.dataset.role = 'group-del';
                 delBtn.dataset.gid = group.id;
@@ -4683,10 +4683,10 @@
             input.className = 'text_pole wbm-preset-name';
             input.type = 'text';
             input.maxLength = 30;
-            input.placeholder = '新建分组，起个名字';
+            input.placeholder = 'Tên nhóm mới';
             input.dataset.role = 'group-name-input';
             footer.appendChild(input);
-            const ok = el('button', 'menu_button wbm-chip wbm-chip-sm', preset ? '新建并移入' : '新建分组');
+            const ok = el('button', 'menu_button wbm-chip wbm-chip-sm', preset ? 'Tạo và chuyển vào' : 'Tạo nhóm mới');
             ok.type = 'button';
             ok.dataset.role = 'group-create';
             footer.appendChild(ok);
@@ -4694,12 +4694,12 @@
 
             const createAndMaybeMove = () => {
                 const group = createGroup(input.value);
-                if (!group) { toast('error', '先给分组起个名字'); return; }
+                if (!group) { toast('error', 'Hãy đặt tên cho nhóm trước'); return; }
                 if (preset) {
                     movePresetToGroup(preset.id, group.id);
                     closeSelf();
                 } else {
-                    toast('info', '已新建分组「' + group.name + '」');
+                    toast('info', 'Đã tạo nhóm “' + group.name + '”');
                     rebuild();
                 }
             };
@@ -4737,9 +4737,9 @@
                     nameInput.value = group.name;
                     nameSpan.appendChild(nameInput);
                     tools.textContent = '';
-                    const okBtn = el('button', 'wbm-preset-tool', '保存');
+                    const okBtn = el('button', 'wbm-preset-tool', 'Lưu');
                     okBtn.type = 'button';
-                    const cancelBtn = el('button', 'wbm-preset-tool', '取消');
+                    const cancelBtn = el('button', 'wbm-preset-tool', 'Hủy');
                     cancelBtn.type = 'button';
                     tools.appendChild(okBtn);
                     tools.appendChild(cancelBtn);
@@ -4763,7 +4763,7 @@
                     const gid = delBtn.dataset.gid;
                     if (state.groupDelArm !== gid) {
                         state.groupDelArm = gid;
-                        delBtn.textContent = '确认';
+                        delBtn.textContent = 'Xác nhận';
                         delBtn.classList.add('armed');
                         return;
                     }
@@ -4791,7 +4791,7 @@
             document.documentElement.appendChild(mask);
             input.focus();
         } catch (err) {
-            console.warn('[wb] 打开分组浮层失败', err);
+            console.warn('[wb] Mở cửa sổ nhóm thất bại', err);
         }
     }
 
@@ -4810,7 +4810,7 @@
             state.picker = mask;
 
             const grip = el('div', 'wbm-picker-grip');
-            const title = el('div', 'wbm-picker-title', '世界书分类');
+            const title = el('div', 'wbm-picker-title', 'Phân loại lorebook');
 
             /* 搜索条：左边输入框，右边两个模式键（书名 / 条目标题） */
             const searchRow = el('div', 'wbm-cat-search');
@@ -4818,7 +4818,7 @@
             input.type = 'search';
             /* 提示文字必须跟着模式走：切到"条目标题"还写着"搜索书名"，
                会让人以为模式没生效 */
-            const catPlaceholder = (mode) => (mode === 'title' ? '搜索条目标题' : '搜索书名');
+            const catPlaceholder = (mode) => (mode === 'title' ? 'Tìm tiêu đề mục' : 'Tìm tên lorebook');
             input.placeholder = catPlaceholder(state.catMode);
             input.dataset.role = 'cat-query';
             searchRow.appendChild(input);
@@ -4829,8 +4829,8 @@
                 btn.dataset.mode = mode;
                 return btn;
             };
-            searchRow.appendChild(mkMode('书名', 'book'));
-            searchRow.appendChild(mkMode('条目标题', 'title'));
+            searchRow.appendChild(mkMode('Tên lorebook', 'book'));
+            searchRow.appendChild(mkMode('Tiêu đề mục', 'title'));
 
             const body = el('div', 'wbm-picker-list wbm-cat-body');
             sheet.appendChild(grip);
@@ -5045,7 +5045,7 @@
                 refreshFilterView();
                 return;
             }
-            toast('info', '搜索范围：' + searchScopeSummary() + '（在条目搜索框里输入时生效）');
+            toast('info', 'Phạm vi tìm: ' + searchScopeSummary() + ' (có hiệu lực khi gõ vào ô tìm mục)');
         });
     }
 
@@ -5111,10 +5111,10 @@
                 return pinned;
             };
             wiFilterPatched = true;
-            console.info('[wbm] 已接管世界书筛选与收藏置顶，两者现在都覆盖全库');
+            console.info('[wbm] Đã tiếp quản bộ lọc lorebook và ghim yêu thích, cả hai giờ áp dụng cho toàn bộ lorebook');
             return true;
         } catch (err) {
-            console.warn('[wbm] 接管世界书筛选失败，退回当前页筛选', err);
+            console.warn('[wbm] Tiếp quản bộ lọc lorebook thất bại, quay về lọc trang hiện tại', err);
             return false;
         }
     }
@@ -5186,7 +5186,7 @@
             const pageSize = Math.max(1, Math.ceil(ordered.length / totalPage));
             return Math.floor(index / pageSize) + 1;
         } catch (err) {
-            console.warn('[wbm] 计算命中页失败', err);
+            console.warn('[wbm] Tính trang có kết quả thất bại', err);
             return 0;
         }
     }
@@ -5198,11 +5198,11 @@
         const favs = favEntryKeySet();
         const page = await jumpToFirstMatchingPage(book, favs);
         if (page === -1) {
-            toast('info', '整本没有符合条件的条目');
+            toast('info', 'Cả lorebook không có mục nào phù hợp');
             return;
         }
         if (page > 0 && page !== currentPaginationPage()) {
-            toast('info', '筛选只作用于当前页：第 ' + page + ' 页有命中，已跳过去');
+            toast('info', 'Bộ lọc chỉ áp dụng cho trang hiện tại: trang ' + page + ' có kết quả, đã chuyển đến đó');
             try {
                 window.jQuery('#world_info_pagination').pagination('go', page);
             } catch (err) { /* 跳页失败就保持原样 */ }
@@ -5211,11 +5211,11 @@
 
     function buildEntryFavBar() {
         const bar = el('div', 'wbm-entry-favbar');
-        const onlyBtn = el('button', 'menu_button wbm-chip' + (entryFavOnly ? ' on' : ''), '★ 仅收藏');
+        const onlyBtn = el('button', 'menu_button wbm-chip' + (entryFavOnly ? ' on' : ''), '★ Chỉ yêu thích');
         onlyBtn.type = 'button';
         onlyBtn.dataset.role = 'entry-favonly';
         const pinBtn = el('button', 'menu_button wbm-chip' + (entryFavPinOn() ? ' on' : ''),
-            entryFavPinOn() ? '收藏置顶：开' : '收藏置顶：关');
+            entryFavPinOn() ? 'Ghim yêu thích: bật' : 'Ghim yêu thích: tắt');
         pinBtn.type = 'button';
         pinBtn.dataset.role = 'entry-favpin';
         onlyBtn.addEventListener('click', (event) => {
@@ -5233,10 +5233,10 @@
             /* 置顶现在由宿主管线按整本书排序，必须让它重算一次列表 */
             refreshFilterView();
         });
-        const disabledBtn = el('button', 'menu_button wbm-chip' + (entryDisabledOnly ? ' on' : ''), '只看已禁用');
+        const disabledBtn = el('button', 'menu_button wbm-chip' + (entryDisabledOnly ? ' on' : ''), 'Chỉ xem đã tắt');
         disabledBtn.type = 'button';
         disabledBtn.dataset.role = 'entry-disabled';
-        disabledBtn.title = '只看被开关关掉的条目';
+        disabledBtn.title = 'Chỉ xem các mục đã bị tắt';
         disabledBtn.addEventListener('click', (event) => {
             event.preventDefault();
             event.stopPropagation();
@@ -5244,7 +5244,7 @@
             applyEntryFavFilter();
             refreshFilterView();
         });
-        bar.appendChild(el('span', 'wbm-favbar-label', '筛选'));
+        bar.appendChild(el('span', 'wbm-favbar-label', 'Lọc'));
         bar.appendChild(onlyBtn);
         bar.appendChild(disabledBtn);
         ENTRY_STATE_LABELS.forEach((item) => {
@@ -5253,7 +5253,7 @@
             chip.type = 'button';
             chip.dataset.role = 'entry-state-' + item.value;
             chip.dataset.state = item.value;
-            chip.title = '只看「' + item.label.slice(item.label.indexOf(' ') + 1) + '」的条目，可与其它状态叠加';
+            chip.title = 'Chỉ xem mục “' + item.label.slice(item.label.indexOf(' ') + 1) + '”, có thể kết hợp với trạng thái khác';
             chip.addEventListener('click', (event) => {
                 event.preventDefault();
                 event.stopPropagation();
@@ -5272,13 +5272,13 @@
 
     /* 三枚胶囊对应四类字段：关键词这一项里包含主关键词与次要关键词（1.18 里两者都是数组） */
     const REPLACE_GROUPS = [
-        { id: 'comment', label: '备注名', fields: ['comment'] },
-        { id: 'key', label: '关键词', fields: ['key', 'keysecondary'] },
-        { id: 'content', label: '正文', fields: ['content'] },
+        { id: 'comment', label: 'Tên ghi chú', fields: ['comment'] },
+        { id: 'key', label: 'Từ khóa', fields: ['key', 'keysecondary'] },
+        { id: 'content', label: 'Nội dung', fields: ['content'] },
     ];
     const REPLACE_FIELDS = ['comment', 'key', 'keysecondary', 'content'];
     const REPLACE_FIELD_LABEL = {
-        comment: '备注名', key: '关键词', keysecondary: '次要关键词', content: '正文',
+        comment: 'Tên ghi chú', key: 'Từ khóa', keysecondary: 'Từ khóa phụ', content: 'Nội dung',
     };
     /* 1.18 里还有一份给旧格式用的镜像数据，改完要同步过去，否则下次酒馆重存会把它改回去 */
     const REPLACE_ORIGINAL_KEY = {
@@ -5365,7 +5365,7 @@
             result.entries += 1;
             result.changed.push({
                 uid: String(uid),
-                name: String(entry.comment || '').trim() || ('条目 ' + uid),
+                name: String(entry.comment || '').trim() || ('Mục ' + uid),
                 before,
             });
         });
@@ -5434,13 +5434,13 @@
         const book = String(record && record.from ? record.from : '');
         const notes = record && Array.isArray(record.entries) ? record.entries : [];
         if (!book || !notes.length) {
-            toast('warning', '这条记录没留原文（可能过大未保留），撤不了');
+            toast('warning', 'Bản ghi này không lưu nội dung gốc (có thể do quá lớn), không thể hoàn tác');
             return false;
         }
         try {
             const mod = await import('/scripts/world-info.js');
             if (typeof mod.loadWorldInfo !== 'function' || typeof mod.saveWorldInfo !== 'function') {
-                toast('warning', '当前版本拿不到世界书接口，撤销失败');
+                toast('warning', 'Phiên bản hiện tại không truy cập được API lorebook, hoàn tác thất bại');
                 return false;
             }
             if (mod.worldInfoCache && typeof mod.worldInfoCache.delete === 'function') mod.worldInfoCache.delete(book);
@@ -5448,13 +5448,13 @@
             const data = await mod.loadWorldInfo(book);
             if (!data || !data.entries) {
                 markHistoryBookGone(record);
-                toast('warning', '「' + book + '」已经不在了（被删或改名），撤销不了');
+                toast('warning', '“' + book + '” không còn nữa (đã bị xóa hoặc đổi tên), không thể hoàn tác');
                 return false;
             }
             const res = undoReplacements(data, notes);
             syncOriginalData(mod, data, notes);
             if (!res.restored) {
-                toast('warning', '没有条目能写回（可能已经被删掉）');
+                toast('warning', 'Không có mục nào để ghi lại (có thể đã bị xóa)');
                 return false;
             }
             await mod.saveWorldInfo(book, data, true);
@@ -5467,12 +5467,12 @@
                 names: notes.map((n) => String(n && n.name || '')).filter(Boolean).slice(0, 5),
             });
             restoreEntryUi(snap);
-            toast('info', (record.act === 'edit' ? '已撤销正文编辑：写回 ' : '已撤销替换：写回 ') + res.restored + ' 条'
-                + (res.skipped ? '，' + res.skipped + ' 条已不存在' : ''));
+            toast('info', (record.act === 'edit' ? 'Đã hoàn tác sửa nội dung: ghi lại ' : 'Đã hoàn tác thay thế: ghi lại ') + res.restored + ' mục'
+                + (res.skipped ? ', ' + res.skipped + ' mục không còn tồn tại' : ''));
             return true;
         } catch (err) {
-            console.error('[wbm] 撤销替换失败', err);
-            toast('warning', '撤销没有成功');
+            console.error('[wbm] Hoàn tác thay thế thất bại', err);
+            toast('warning', 'Hoàn tác không thành công');
             return false;
         }
     }
@@ -5481,7 +5481,7 @@
     async function openReplacePicker() {
         const book = currentEditingName();
         if (!book) {
-            toast('warning', '先选一本世界书');
+            toast('warning', 'Hãy chọn một lorebook trước');
             return;
         }
         let mod = null;
@@ -5490,26 +5490,26 @@
             mod = await import('/scripts/world-info.js');
             data = await mod.loadWorldInfo(book);
         } catch (err) {
-            console.error('[wbm] 打开批量替换失败', err);
+            console.error('[wbm] Mở thay thế hàng loạt thất bại', err);
         }
         if (!data || !data.entries) {
-            toast('warning', '读不到这本书的条目');
+            toast('warning', 'Không đọc được các mục của lorebook này');
             return;
         }
 
         const { mask, sheet } = makePickerShell();
         state.picker = mask;
-        const head = buildPickerHead('要查找的内容');
+        const head = buildPickerHead('Nội dung cần tìm');
         const findInput = head.input;
 
-        const titleLine = el('div', 'wbm-prev-meta', '批量替换 · ' + book);
+        const titleLine = el('div', 'wbm-prev-meta', 'Thay thế hàng loạt · ' + book);
         const replRow = el('div', 'wbm-replace-row');
-        replRow.appendChild(el('span', 'wbm-replace-label', '替换为'));
+        replRow.appendChild(el('span', 'wbm-replace-label', 'Thay bằng'));
         const replInput = el('input', 'text_pole wbm-replace-field');
         replInput.type = 'text';
         replInput.setAttribute('autocomplete', 'off');
         replInput.setAttribute('spellcheck', 'false');
-        replInput.placeholder = '留空＝删除找到的内容';
+        replInput.placeholder = 'Để trống = xóa nội dung tìm được';
         replRow.appendChild(replInput);
 
         const chips = el('div', 'wbm-favbar wbm-replace-chips');
@@ -5526,7 +5526,7 @@
             chips.appendChild(chip);
         });
         let caseSensitive = false;
-        const caseChip = el('button', 'menu_button wbm-chip', '区分大小写');
+        const caseChip = el('button', 'menu_button wbm-chip', 'Phân biệt hoa thường');
         caseChip.type = 'button';
         caseChip.addEventListener('click', () => {
             caseSensitive = !caseSensitive;
@@ -5537,7 +5537,7 @@
 
         const list = el('div', 'wbm-picker-list');
         const actions = el('div', 'wbm-picker-actions');
-        const runBtn = el('button', 'wbm-picker-action primary wide', '替换');
+        const runBtn = el('button', 'wbm-picker-action primary wide', 'Thay thế');
         runBtn.type = 'button';
         runBtn.disabled = true;
         actions.appendChild(runBtn);
@@ -5562,19 +5562,19 @@
             const find = String(findInput.value || '');
             list.textContent = '';
             runBtn.disabled = true;
-            runBtn.textContent = '替换';
+            runBtn.textContent = 'Thay thế';
             if (!find) {
-                list.appendChild(el('div', 'wbm-picker-empty', '输入要查找的内容，下面会列出命中'));
+                list.appendChild(el('div', 'wbm-picker-empty', 'Nhập nội dung cần tìm, kết quả khớp sẽ hiện bên dưới'));
                 return;
             }
             const fields = fieldsNow();
             if (!fields.length) {
-                list.appendChild(el('div', 'wbm-picker-empty', '至少留一面：备注名 / 关键词 / 正文'));
+                list.appendChild(el('div', 'wbm-picker-empty', 'Giữ ít nhất một phạm vi: Tên ghi chú / Từ khóa / Nội dung'));
                 return;
             }
             const preview = replacePreview(data, find, String(replInput.value || ''), fields, caseSensitive, 40);
             list.appendChild(el('div', 'wbm-prev-meta',
-                '命中 ' + preview.hits + ' 处，涉及 ' + preview.entries + ' 条'));
+                'Khớp ' + preview.hits + ' chỗ, trong ' + preview.entries + ' mục'));
             preview.rows.forEach((row) => {
                 const item = el('div', 'wbm-picker-row');
                 const col = el('div', 'wbm-hist-col');
@@ -5585,9 +5585,9 @@
             });
             if (preview.entries > preview.rows.length) {
                 list.appendChild(el('div', 'wbm-picker-empty',
-                    '……还有 ' + (preview.entries - preview.rows.length) + ' 条没列出'));
+                    '… còn ' + (preview.entries - preview.rows.length) + ' mục chưa liệt kê'));
             }
-            runBtn.textContent = '替换 ' + preview.hits + ' 处（' + preview.entries + ' 条）';
+            runBtn.textContent = 'Thay thế ' + preview.hits + ' chỗ (' + preview.entries + ' mục)';
             runBtn.disabled = preview.hits === 0;
         };
 
@@ -5597,20 +5597,20 @@
             const fields = fieldsNow();
             if (!find || !fields.length) return;
             runBtn.disabled = true;
-            runBtn.textContent = '替换中…';
+            runBtn.textContent = 'Đang thay thế…';
             try {
                 const snap = snapshotEntryUi();
                 /* 真改之前踢掉缓存，拿服务端最新的那本，免得把别处刚做的改动覆盖掉 */
                 if (mod.worldInfoCache && typeof mod.worldInfoCache.delete === 'function') mod.worldInfoCache.delete(book);
                 const fresh = await mod.loadWorldInfo(book);
                 if (!fresh || !fresh.entries) {
-                    toast('warning', '读不到这本书');
+                    toast('warning', 'Không đọc được lorebook này');
                     refresh();
                     return;
                 }
                 const res = applyReplacements(fresh, find, repl, fields, caseSensitive);
                 if (!res.hits) {
-                    toast('warning', '没有命中');
+                    toast('warning', 'Không có kết quả khớp');
                     refresh();
                     return;
                 }
@@ -5627,13 +5627,13 @@
                     entries: tooBig ? [] : res.changed,
                     payloadDropped: tooBig,
                 });
-                toast('info', '已替换 ' + res.hits + ' 处（' + res.entries + ' 条）'
-                    + (tooBig ? '；原文过大未保留，不能撤销' : '，可在「操作历史」里撤销'));
+                toast('info', 'Đã thay thế ' + res.hits + ' chỗ (' + res.entries + ' mục)'
+                    + (tooBig ? '; nội dung gốc quá lớn không được lưu, không thể hoàn tác' : ', có thể hoàn tác trong “Lịch sử thao tác”'));
                 restoreEntryUi(snap);
                 closeEditorPicker();
             } catch (err) {
-                console.error('[wbm] 批量替换失败', err);
-                toast('warning', '替换没有成功');
+                console.error('[wbm] Thay thế hàng loạt thất bại', err);
+                toast('warning', 'Thay thế không thành công');
                 refresh();
             }
         });
@@ -5669,15 +5669,15 @@
             field: 'excludeRecursion',
             original: 'extensions.exclude_recursion',
             extKey: 'exclude_recursion',
-            label: '不可递归',
-            hint: '不会被别的条目激活',
+            label: 'Không thể đệ quy',
+            hint: 'Không bị mục khác kích hoạt',
         },
         {
             field: 'preventRecursion',
             original: 'extensions.prevent_recursion',
             extKey: 'prevent_recursion',
-            label: '防止进一步递归',
-            hint: '不会再去激活别的条目',
+            label: 'Ngăn đệ quy thêm',
+            hint: 'Không kích hoạt thêm mục khác',
         },
     ];
 
@@ -5709,13 +5709,13 @@
         const book = String(record && record.from ? record.from : '');
         const notes = record && Array.isArray(record.entries) ? record.entries : [];
         if (!book || !notes.length) {
-            toast('warning', '这条记录没留原文，撤不了');
+            toast('warning', 'Bản ghi này không lưu nội dung gốc, không thể hoàn tác');
             return false;
         }
         try {
             const mod = await import('/scripts/world-info.js');
             if (typeof mod.loadWorldInfo !== 'function' || typeof mod.saveWorldInfo !== 'function') {
-                toast('warning', '当前版本拿不到世界书接口，撤销失败');
+                toast('warning', 'Phiên bản hiện tại không truy cập được API lorebook, hoàn tác thất bại');
                 return false;
             }
             if (mod.worldInfoCache && typeof mod.worldInfoCache.delete === 'function') mod.worldInfoCache.delete(book);
@@ -5723,12 +5723,12 @@
             const data = await mod.loadWorldInfo(book);
             if (!data || !data.entries) {
                 markHistoryBookGone(record);
-                toast('warning', '「' + book + '」已经不在了（被删或改名），撤销不了');
+                toast('warning', '“' + book + '” không còn nữa (đã bị xóa hoặc đổi tên), không thể hoàn tác');
                 return false;
             }
             const res = undoRecursionFlags(data, notes);
             if (!res.restored) {
-                toast('warning', '没有条目能写回（可能已经被删掉）');
+                toast('warning', 'Không có mục nào để ghi lại (có thể đã bị xóa)');
                 return false;
             }
             if (typeof mod.setWIOriginalDataValue === 'function') {
@@ -5748,12 +5748,12 @@
                 names: notes.map((n) => String(n && n.name || '')).filter(Boolean).slice(0, 5),
             });
             restoreEntryUi(snap);
-            toast('info', '已撤销递归开关：写回 ' + res.restored + ' 条'
-                + (res.skipped ? '，' + res.skipped + ' 条已不存在' : ''));
+            toast('info', 'Đã hoàn tác công tắc đệ quy: ghi lại ' + res.restored + ' mục'
+                + (res.skipped ? ', ' + res.skipped + ' mục không còn tồn tại' : ''));
             return true;
         } catch (err) {
-            console.error('[wbm] 撤销递归开关失败', err);
-            toast('warning', '撤销没有成功');
+            console.error('[wbm] Hoàn tác công tắc đệ quy thất bại', err);
+            toast('warning', 'Hoàn tác không thành công');
             return false;
         }
     }
@@ -5777,7 +5777,7 @@
             });
             changed.push({
                 uid: String(uid),
-                name: String(entry.comment || '').trim() || ('条目 ' + uid),
+                name: String(entry.comment || '').trim() || ('Mục ' + uid),
                 before,
             });
         });
@@ -5813,7 +5813,7 @@
             });
             return changed.length;
         } catch (err) {
-            console.error('[wbm] 批量递归开关失败', err);
+            console.error('[wbm] Bật/tắt đệ quy hàng loạt thất bại', err);
             return 0;
         }
     }
@@ -5821,7 +5821,7 @@
     async function openRecursionPicker() {
         const book = currentEditingName();
         if (!book) {
-            toast('warning', '先选一本世界书');
+            toast('warning', 'Hãy chọn một lorebook trước');
             return;
         }
         let mod = null;
@@ -5830,10 +5830,10 @@
             mod = await import('/scripts/world-info.js');
             data = await mod.loadWorldInfo(book);
         } catch (err) {
-            console.error('[wbm] 打开递归开关失败', err);
+            console.error('[wbm] Mở cài đặt đệ quy thất bại', err);
         }
         if (!data || !data.entries) {
-            toast('warning', '读不到这本书的条目');
+            toast('warning', 'Không đọc được các mục của lorebook này');
             return;
         }
 
@@ -5842,7 +5842,7 @@
         state.picker = mask;
 
         const head = el('div', 'wbm-picker-head');
-        head.appendChild(el('div', 'wbm-prev-title', '递归开关 · ' + book));
+        head.appendChild(el('div', 'wbm-prev-title', 'Công tắc đệ quy · ' + book));
         const close = el('button', 'wbm-picker-close', '✕');
         close.type = 'button';
         close.dataset.role = 'picker-close';
@@ -5854,33 +5854,33 @@
             const col = el('div', 'wbm-hist-col');
             col.appendChild(el('span', 'wbm-hist-line', flag.label + ' · ' + flag.hint));
             const on = uids.filter((uid) => data.entries[uid] && data.entries[uid][flag.field]).length;
-            col.appendChild(el('span', 'wbm-hist-names', '当前 ' + on + ' / ' + uids.length + ' 条已开启'));
+            col.appendChild(el('span', 'wbm-hist-names', 'Hiện có ' + on + ' / ' + uids.length + ' mục đã bật'));
             row.appendChild(col);
             list.appendChild(row);
         });
         list.appendChild(el('div', 'wbm-warn-row',
-            '⚠️ 危险操作：这两项会直接影响检索行为。开错会让本该被其它条目激活的条目失效；'
-            + '反过来，本来就是"触发器"的条目应该保持关闭。'
-            + '每次操作都会记进「操作历史」，误操作可以在那里点「撤销」原样还原。'));
+            '⚠️ Thao tác nguy hiểm: hai tùy chọn này ảnh hưởng trực tiếp đến việc kích hoạt. Bật nhầm sẽ khiến các mục lẽ ra được mục khác kích hoạt bị vô hiệu; '
+            + 'ngược lại, các mục vốn đóng vai trò "kích hoạt" nên để tắt. '
+            + 'Mỗi thao tác đều được ghi vào “Lịch sử thao tác”, nếu làm nhầm có thể chạm “Hoàn tác” ở đó để khôi phục nguyên trạng.'));
         list.appendChild(el('div', 'wbm-picker-empty',
-            '写卡、改卡时可以全部开启，再把要当触发器的条目手动关掉；'
-            + '「批量操作」里也有批量开关这两项的功能。'));
+            'Khi viết hoặc sửa thẻ, có thể bật hết rồi tắt thủ công các mục dùng làm kích hoạt; '
+            + 'trong “Thao tác hàng loạt” cũng có chức năng bật/tắt hàng loạt hai tùy chọn này.'));
 
         const actions = el('div', 'wbm-picker-actions');
-        const onBtn = el('button', 'wbm-picker-action primary wide', '全部开启这两项');
+        const onBtn = el('button', 'wbm-picker-action primary wide', 'Bật hết hai tùy chọn');
         onBtn.type = 'button';
-        const offBtn = el('button', 'wbm-picker-action', '全部关闭');
+        const offBtn = el('button', 'wbm-picker-action', 'Tắt hết');
         offBtn.type = 'button';
         /* 已经是全开/全关时把对应的按钮按掉，免得点下去什么都没变还留一条记录 */
         const allOn = uids.every((uid) => RECURSION_FLAGS.every((flag) => !!(data.entries[uid] && data.entries[uid][flag.field])));
         const allOff = uids.every((uid) => RECURSION_FLAGS.every((flag) => !(data.entries[uid] && data.entries[uid][flag.field])));
         if (allOn) {
             onBtn.disabled = true;
-            onBtn.title = '这本书的条目已经全部开启了这两项';
+            onBtn.title = 'Các mục của lorebook này đã bật hết hai tùy chọn này';
         }
         if (allOff) {
             offBtn.disabled = true;
-            offBtn.title = '这本书的条目已经全部关闭了这两项';
+            offBtn.title = 'Các mục của lorebook này đã tắt hết hai tùy chọn này';
         }
         actions.appendChild(onBtn);
         actions.appendChild(offBtn);
@@ -5897,7 +5897,7 @@
                 if (mod.worldInfoCache && typeof mod.worldInfoCache.delete === 'function') mod.worldInfoCache.delete(book);
                 const fresh = await mod.loadWorldInfo(book);
                 if (!fresh || !fresh.entries) {
-                    toast('warning', '读不到这本书');
+                    toast('warning', 'Không đọc được lorebook này');
                     onBtn.disabled = false;
                     offBtn.disabled = false;
                     return;
@@ -5905,8 +5905,8 @@
                 /* 只改"还不是这个状态"的条目：前后无变化就不写盘、不记历史 */
                 const changed = applyRecursionToEntries(fresh, Object.keys(fresh.entries), value);
                 if (!changed.length) {
-                    toast('info', '这本书的条目已经' + (value ? '全部开启' : '全部关闭')
-                        + '这两项了，没有要改的');
+                    toast('info', 'Các mục của lorebook này đã ' + (value ? 'bật hết' : 'tắt hết')
+                        + ' hai tùy chọn này rồi, không có gì cần đổi');
                     onBtn.disabled = false;
                     offBtn.disabled = false;
                     restoreEntryUi(snap);
@@ -5931,10 +5931,10 @@
                 });
                 restoreEntryUi(snap);
                 closeEditorPicker();
-                toast('info', (value ? '已开启' : '已关闭') + '递归开关：' + changed.length + ' 条');
+                toast('info', (value ? 'Đã bật' : 'Đã tắt') + ' công tắc đệ quy: ' + changed.length + ' mục');
             } catch (err) {
-                console.error('[wbm] 设置递归开关失败', err);
-                toast('warning', '设置没有成功');
+                console.error('[wbm] Đặt công tắc đệ quy thất bại', err);
+                toast('warning', 'Cài đặt không thành công');
                 onBtn.disabled = false;
                 offBtn.disabled = false;
             }
@@ -6003,7 +6003,7 @@
                 return;
             }
             report.total += 1;
-            const name = String(entry.comment || '').trim() || ('条目 ' + uid);
+            const name = String(entry.comment || '').trim() || ('Mục ' + uid);
             const keys = Array.isArray(entry.key) ? entry.key : [];
             const keys2 = Array.isArray(entry.keysecondary) ? entry.keysecondary : [];
             const all = keys.concat(keys2);
@@ -6067,7 +6067,7 @@
             if (Object.keys(before).length) {
                 changed.push({
                     uid: String(uid),
-                    name: String(entry.comment || '').trim() || ('条目 ' + uid),
+                    name: String(entry.comment || '').trim() || ('Mục ' + uid),
                     before,
                 });
             }
@@ -6083,7 +6083,7 @@
         const snap = snapshotEntryUi();
         const data = await mod.loadWorldInfo(book);
         if (!data || !data.entries) {
-            toast('warning', '读不到这本书');
+            toast('warning', 'Không đọc được lorebook này');
             return 0;
         }
         const changed = mutate(data);
@@ -6146,7 +6146,7 @@
     async function openHealthCheck() {
         const book = currentEditingName();
         if (!book) {
-            toast('warning', '先选一本世界书');
+            toast('warning', 'Hãy chọn một lorebook trước');
             return;
         }
         let data = null;
@@ -6154,10 +6154,10 @@
             const mod = await import('/scripts/world-info.js');
             data = await mod.loadWorldInfo(book);
         } catch (err) {
-            console.error('[wbm] 体检读取失败', err);
+            console.error('[wbm] Đọc dữ liệu kiểm tra thất bại', err);
         }
         if (!data || !data.entries) {
-            toast('warning', '读不到这本书的条目');
+            toast('warning', 'Không đọc được các mục của lorebook này');
             return;
         }
 
@@ -6167,7 +6167,7 @@
         const { mask, sheet } = makePickerShell();
         state.picker = mask;
         const head = el('div', 'wbm-picker-head');
-        head.appendChild(el('div', 'wbm-prev-title', '条目体检 BETA · ' + book));
+        head.appendChild(el('div', 'wbm-prev-title', 'Kiểm tra mục BETA · ' + book));
         const close = el('button', 'wbm-picker-close', '✕');
         close.type = 'button';
         close.dataset.role = 'picker-close';
@@ -6176,27 +6176,27 @@
         const list = el('div', 'wbm-picker-list');
 
         list.appendChild(el('div', 'wbm-warn-row',
-            '谨慎操作：这里的「一键修」会真的改写条目数据（目前只改关键词：拆中文逗号、去重）。'
-            + '每次修复都会记进「操作历史」，改错了可以去那里点「撤销」原样还原。'));
+            'Cẩn thận: “Sửa nhanh” ở đây sẽ ghi đè dữ liệu mục (hiện chỉ sửa từ khóa: tách dấu phẩy kiểu Trung, bỏ trùng lặp). '
+            + 'Mỗi lần sửa đều được ghi vào “Lịch sử thao tác”, sửa nhầm có thể vào đó chạm “Hoàn tác” để khôi phục nguyên trạng.'));
 
         /* ⓘ 说明：纯静态文本折叠，不请求、不扫描，零开销 */
-        const infoBtn = el('button', 'wbm-health-info', 'ⓘ 这项检查都查什么、能修什么');
+        const infoBtn = el('button', 'wbm-health-info', 'ⓘ Kiểm tra những gì, sửa được những gì');
         const infoBody = el('div', 'wbm-health-info-body');
         infoBody.style.display = 'none';
         [
-            '能自动修（会写盘、可撤销）：',
-            '· 关键词里有中文逗号 / 顿号 —— 酒馆只认英文逗号，这种词会被当成一个整词，永远不触发；',
-            '· 关键词重复 —— 同一个词在主/次关键词里出现多次。',
-            '只提示、不自动改（要人工判断）：',
-            '· 单个关键词超长 —— 可能是粘在一起漏了逗号（带 - 或 _ 的标识符不报）；',
-            '· 没有关键词却不是常量档 —— 正常档没关键词就永不触发；',
-            '· 只填了可选过滤器、主关键词为空 —— 可选过滤器只在主关键词命中后才参与判断，所以这条永不触发，'
-            + '要激活请把触发词填进主关键词；',
-            '· 正文为空；',
-            '· 触发概率为 0；',
-            '· 备注名重复；',
-            '· 「不可递归 / 防止进一步递归」都没开 —— 只是提示，触发器本来就该关着。',
-            '点分类展开，点条目名就地看摘录，点「全文」打开只读预览，点「忽略」以后不再提这一条。',
+            'Tự động sửa được (sẽ ghi đĩa, có thể hoàn tác):',
+            '· Từ khóa chứa dấu phẩy kiểu Trung (，、) — SillyTavern chỉ nhận dấu phẩy thường (,), từ khóa như vậy bị coi là một từ duy nhất, không bao giờ kích hoạt;',
+            '· Từ khóa trùng lặp — cùng một từ xuất hiện nhiều lần trong từ khóa chính/phụ.',
+            'Chỉ cảnh báo, không tự sửa (cần tự đánh giá):',
+            '· Một từ khóa quá dài — có thể do dính liền vì thiếu dấu phẩy (định danh có - hoặc _ không bị báo);',
+            '· Không có từ khóa nhưng không phải chế độ Hằng số — chế độ Thường mà không có từ khóa sẽ không bao giờ kích hoạt;',
+            '· Chỉ điền bộ lọc phụ, từ khóa chính để trống — bộ lọc phụ chỉ được xét sau khi từ khóa chính khớp, nên mục này không bao giờ kích hoạt,'
+            + 'muốn kích hoạt hãy điền từ kích hoạt vào từ khóa chính;',
+            '· Nội dung trống;',
+            '· Xác suất kích hoạt bằng 0;',
+            '· Tên ghi chú trùng lặp;',
+            '· Chưa bật cả “Không thể đệ quy / Ngăn đệ quy thêm” — chỉ là gợi ý, mục kích hoạt vốn nên để tắt.',
+            'Chạm loại để mở rộng, chạm tên mục để xem trích đoạn, chạm “Toàn văn” để mở xem trước chỉ đọc, chạm “Bỏ qua” để không nhắc mục này nữa.',
         ].forEach((line) => infoBody.appendChild(el('div', 'wbm-health-info-line', line)));
         infoBtn.addEventListener('click', (event) => {
             event.preventDefault();
@@ -6209,15 +6209,15 @@
         list.appendChild(infoBody);
 
         const categories = [
-            { key: 'comma', label: '关键词里有中文逗号 / 顿号（会被当成一个词，永不触发）', fix: true },
-            { key: 'dup', label: '关键词重复', fix: true },
-            { key: 'longKey', label: '单个关键词超长（可能漏了逗号粘成一坨）', fix: false },
-            { key: 'noKey', label: '没有关键词却不是常量档（永不触发）', fix: false },
-            { key: 'onlySecondary', label: '只填了可选过滤器、主关键词为空（永不触发）', fix: false },
-            { key: 'noBody', label: '正文为空', fix: false },
-            { key: 'zero', label: '触发概率为 0', fix: false },
-            { key: 'sameName', label: '备注名重复', fix: false },
-            { key: 'recOff', label: '「不可递归 / 防止进一步递归」都没开（仅提示）', fix: false, info: true },
+            { key: 'comma', label: 'Từ khóa chứa dấu phẩy kiểu Trung (，、) (bị coi là một từ, không bao giờ kích hoạt)', fix: true },
+            { key: 'dup', label: 'Từ khóa trùng lặp', fix: true },
+            { key: 'longKey', label: 'Từ khóa quá dài (có thể thiếu dấu phẩy nên bị dính liền)', fix: false },
+            { key: 'noKey', label: 'Không có từ khóa nhưng không phải Hằng số (không bao giờ kích hoạt)', fix: false },
+            { key: 'onlySecondary', label: 'Chỉ điền bộ lọc phụ, từ khóa chính trống (không bao giờ kích hoạt)', fix: false },
+            { key: 'noBody', label: 'Nội dung trống', fix: false },
+            { key: 'zero', label: 'Xác suất kích hoạt bằng 0', fix: false },
+            { key: 'sameName', label: 'Tên ghi chú trùng lặp', fix: false },
+            { key: 'recOff', label: 'Chưa bật cả “Không thể đệ quy / Ngăn đệ quy thêm” (chỉ gợi ý)', fix: false, info: true },
         ];
 
         let problems = 0;
@@ -6225,7 +6225,7 @@
 
         const buildEntryLine = (item) => {
             const uid = String(item.uid === undefined ? '' : item.uid);
-            const name = item.name || ('同名 ' + (item.uids || []).length + ' 条');
+            const name = item.name || ('Trùng tên ' + (item.uids || []).length + ' mục');
             const line = el('div', 'wbm-health-item');
             const nameBtn = el('button', 'wbm-health-name', name);
             nameBtn.type = 'button';
@@ -6244,15 +6244,15 @@
                 if (!excerpt.textContent) {
                     if (entry) excerpt.appendChild(buildKeywordLines(entry));
                     excerpt.appendChild(el('div', 'wbm-prev-meta',
-                        entry ? '正文 ' + body.length + ' 字' : '读不到这条数据'));
+                        entry ? 'Nội dung ' + body.length + ' ký tự' : 'Không đọc được dữ liệu này'));
                     excerpt.appendChild(el('div', 'wbm-health-body',
-                        body ? body.slice(0, 300) + (body.length > 300 ? '…' : '') : '（正文为空）'));
+                        body ? body.slice(0, 300) + (body.length > 300 ? '…' : '') : '(nội dung trống)'));
                 }
                 excerpt.style.display = '';
             });
             line.appendChild(nameBtn);
             if (uid && statusOfUid(uid) === 'server') {
-                const previewBtn = el('button', 'wbm-health-act', '全文');
+                const previewBtn = el('button', 'wbm-health-act', 'Toàn văn');
                 previewBtn.type = 'button';
                 previewBtn.addEventListener('click', (event) => {
                     event.preventDefault();
@@ -6262,16 +6262,16 @@
                     openPreview(world, uid);
                 });
                 line.appendChild(previewBtn);
-                const ignoreBtn = el('button', 'wbm-health-act', '忽略');
+                const ignoreBtn = el('button', 'wbm-health-act', 'Bỏ qua');
                 ignoreBtn.type = 'button';
-                ignoreBtn.title = '以后体检不再提醒这一条（存在酒馆本地设置里）';
+                ignoreBtn.title = 'Lần kiểm tra sau không nhắc mục này nữa (lưu trong cài đặt của SillyTavern)';
                 ignoreBtn.addEventListener('click', (event) => {
                     event.preventDefault();
                     event.stopPropagation();
                     toggleHealthIgnore(book, uid);
-                    ignoreBtn.textContent = '已忽略';
+                    ignoreBtn.textContent = 'Đã bỏ qua';
                     ignoreBtn.disabled = true;
-                    toast('info', '已忽略这一条，下次体检不再提它');
+                    toast('info', 'Đã bỏ qua mục này, lần kiểm tra sau sẽ không nhắc nữa');
                 });
                 line.appendChild(ignoreBtn);
             }
@@ -6297,13 +6297,13 @@
             }
             const box = el('div', 'wbm-health-cat');
             const headBtn = el('button', 'wbm-health-head',
-                items.length + ' 条 · ' + category.label);
+                items.length + ' mục · ' + category.label);
             headBtn.type = 'button';
             const detail = el('div', 'wbm-health-list');
             detail.style.display = 'none';
             items.slice(0, 80).forEach((item) => detail.appendChild(buildEntryLine(item)));
             if (items.length > 80) {
-                detail.appendChild(el('div', 'wbm-picker-empty', '……还有 ' + (items.length - 80) + ' 条没列出'));
+                detail.appendChild(el('div', 'wbm-picker-empty', '… còn ' + (items.length - 80) + ' mục chưa liệt kê'));
             }
             headBtn.addEventListener('click', (event) => {
                 event.preventDefault();
@@ -6318,15 +6318,15 @@
         });
 
         if (!problems) {
-            list.appendChild(el('div', 'wbm-picker-empty', '没发现可自动修的问题，这本书挺干净。'));
+            list.appendChild(el('div', 'wbm-picker-empty', 'Không phát hiện lỗi nào cần tự sửa, lorebook này khá sạch.'));
         }
         list.appendChild(el('div', 'wbm-prev-meta',
-            '共扫描 ' + report.total + ' 条' + (report.ignored ? '（另有 ' + report.ignored + ' 条按 master 的要求忽略）' : '')
-            + '。点分类展开，点条目名看正文摘录，或按「全文」打开预览。'));
+            'Đã quét tổng cộng ' + report.total + ' mục' + (report.ignored ? ' (thêm ' + report.ignored + ' mục đã bỏ qua theo yêu cầu của bạn)' : '')
+            + '. Chạm loại để mở rộng, chạm tên mục để xem trích đoạn nội dung, hoặc chạm “Toàn văn” để mở xem trước.'));
 
         const actions = el('div', 'wbm-picker-actions');
         const fixBtn = el('button', 'wbm-picker-action primary wide',
-            fixUids.length ? '一键修关键词（' + fixUids.length + ' 条）' : '没有可自动修的问题');
+            fixUids.length ? 'Sửa nhanh từ khóa (' + fixUids.length + ' mục)' : 'Không có lỗi nào để tự sửa');
         fixBtn.type = 'button';
         fixBtn.disabled = !fixUids.length;
         actions.appendChild(fixBtn);
@@ -6337,20 +6337,20 @@
 
         fixBtn.addEventListener('click', async () => {
             fixBtn.disabled = true;
-            fixBtn.textContent = '修复中…';
+            fixBtn.textContent = 'Đang sửa…';
             try {
                 const changed = await saveKeywordFix(book,
                     (fresh) => applyKeywordNormalize(fresh, fixUids.filter((uid) => !ignore.has(uid))), 'healthfix');
                 if (!changed) {
-                    toast('warning', '没有需要改的地方');
+                    toast('warning', 'Không có chỗ nào cần sửa');
                     fixBtn.disabled = false;
                     return;
                 }
-                toast('info', '已整理 ' + changed + ' 条的关键词，可在「操作历史」里撤销');
+                toast('info', 'Đã sắp xếp từ khóa của ' + changed + ' mục, có thể hoàn tác trong “Lịch sử thao tác”');
                 closeEditorPicker();
             } catch (err) {
-                console.error('[wbm] 体检修复失败', err);
-                toast('warning', '修复没有成功');
+                console.error('[wbm] Sửa lỗi kiểm tra thất bại', err);
+                toast('warning', 'Sửa không thành công');
                 fixBtn.disabled = false;
             }
         });
@@ -6383,9 +6383,9 @@
         const bar = el('div', 'wbm-batch-bar');
         /* 按键的用途分两组，各自一个带标注的小框，和筛选条同一套外观 */
         const dataGroup = el('div', 'wbm-tool-group');
-        dataGroup.appendChild(el('span', 'wbm-favbar-label', '批量整理'));
+        dataGroup.appendChild(el('span', 'wbm-favbar-label', 'Sắp xếp hàng loạt'));
         const checkGroup = el('div', 'wbm-tool-group');
-        checkGroup.appendChild(el('span', 'wbm-favbar-label', '检查记录'));
+        checkGroup.appendChild(el('span', 'wbm-favbar-label', 'Kiểm tra & lịch sử'));
 
         const mkTool = (label, role, handler, group) => {
             const node = el('button', 'menu_button wbm-chip wbm-batch-btn', label);
@@ -6400,11 +6400,11 @@
             return node;
         };
 
-        mkTool('批量替换', 'replace-open', openReplacePicker, dataGroup);
-        mkTool('批量操作', 'batch-open', openBatchPicker, dataGroup);
-        mkTool('递归设置', 'recursion-open', openRecursionPicker, dataGroup);
-        mkTool('条目体检 BETA', 'health-open', openHealthCheck, checkGroup);
-        mkTool('操作历史', 'history-open', openHistoryPicker, checkGroup);
+        mkTool('Thay thế hàng loạt', 'replace-open', openReplacePicker, dataGroup);
+        mkTool('Thao tác hàng loạt', 'batch-open', openBatchPicker, dataGroup);
+        mkTool('Cài đặt đệ quy', 'recursion-open', openRecursionPicker, dataGroup);
+        mkTool('Kiểm tra mục BETA', 'health-open', openHealthCheck, checkGroup);
+        mkTool('Lịch sử thao tác', 'history-open', openHistoryPicker, checkGroup);
 
         /* 「双击编辑条目 / 单击编辑」不再放这排按钮里：它不是整理也不是筛选，
            而且不需要频繁切换，统一收到「扩展程序 → 双端酒馆原生功能优化」抽屉里。 */
@@ -6575,14 +6575,14 @@
         if (state.pendingKill === name) {
             clearKill();
             setActive(name, false);
-            toast('info', '已停用：' + name);
+            toast('info', 'Đã tắt: ' + name);
             return;
         }
         clearKill();
         state.pendingKill = name;
         row.classList.add('confirming');
         const btn = row.querySelector('.wbm-kill');
-        if (btn) btn.textContent = '再点一次';
+        if (btn) btn.textContent = 'Chạm lần nữa';
         state.killTimer = setTimeout(clearKill, 2600);
     }
 
@@ -6593,12 +6593,12 @@
         row.dataset.name = name;
         row.dataset.role = 'jump';
         row.appendChild(el('span', 'wbm-name', name));
-        if (name === editing) row.appendChild(el('span', 'wbm-hint', '编辑中'));
+        if (name === editing) row.appendChild(el('span', 'wbm-hint', 'Đang sửa'));
         const faved = !!(favs && favs.has(name));
         const star = el('button', 'wbm-star' + (faved ? ' on' : ''), faved ? '★' : '☆');
         star.type = 'button';
         star.dataset.role = 'fav';
-        star.setAttribute('aria-label', faved ? '取消收藏' : '收藏');
+        star.setAttribute('aria-label', faved ? 'Bỏ yêu thích' : 'Yêu thích');
         row.appendChild(star);
         const kill = el('button', 'wbm-kill', '✕');
         kill.type = 'button';
@@ -6612,7 +6612,7 @@
         row.dataset.name = name;
         row.dataset.role = 'addrow';
         row.appendChild(el('span', 'wbm-addname', name));
-        row.appendChild(el('span', 'wbm-addmark', on ? '✓ 已启用' : '＋'));
+        row.appendChild(el('span', 'wbm-addmark', on ? '✓ Đã bật' : '+'));
         return row;
     }
 
@@ -6628,14 +6628,14 @@
 
         const search = el('input', 'wbm-search');
         search.type = 'text';
-        search.placeholder = '搜索世界书';
+        search.placeholder = 'Tìm lorebook';
         search.value = state.addQuery;
         search.dataset.role = 'addsearch';
         panel.appendChild(search);
 
         const list = el('div', 'wbm-addlist');
         if (state.addItems.length === 0) {
-            list.appendChild(el('div', 'wbm-none', '全部世界书都已启用'));
+            list.appendChild(el('div', 'wbm-none', 'Tất cả lorebook đều đã bật'));
         } else {
             state.addItems.forEach((name) => list.appendChild(buildAddRow(name, active.has(name))));
         }
@@ -6747,8 +6747,8 @@
 
         /* 头部 */
         const header = el('div', 'wbm-header');
-        header.appendChild(el('span', 'wbm-title', '已启用 ' + actives.length + ' 本'));
-        const addBtn = el('button', 'wbm-add', state.addOpen ? '收起添加' : '＋ 添加');
+        header.appendChild(el('span', 'wbm-title', 'Đã bật ' + actives.length + ' cuốn'));
+        const addBtn = el('button', 'wbm-add', state.addOpen ? 'Thu gọn' : '+ Thêm');
         addBtn.type = 'button';
         addBtn.dataset.role = 'add';
         header.appendChild(addBtn);
@@ -6759,21 +6759,21 @@
 
         /* 已启用列表 */
         if (actives.length === 0) {
-            root.appendChild(el('div', 'wbm-empty', '当前没有启用全局世界书，点「＋ 添加」'));
+            root.appendChild(el('div', 'wbm-empty', 'Hiện chưa bật lorebook toàn cục nào, chạm “+ Thêm”'));
         } else {
-            root.appendChild(el('div', 'wbm-tip', '点名称跳转编辑 · ✕ 停用'));
+            root.appendChild(el('div', 'wbm-tip', 'Chạm tên để chuyển đến chỉnh sửa · ✕ để tắt'));
             /* 搜索框常驻：只要还有启用的世界书就显示，不再按数量阈值忽然冒出来 */
             const search = el('input', 'wbm-search');
             search.type = 'text';
-            search.placeholder = '搜索已启用';
+            search.placeholder = 'Tìm trong danh sách đã bật';
             search.value = state.actQuery;
             search.dataset.role = 'actsearch';
             root.appendChild(search);
             const favBar = el('div', 'wbm-favbar');
-            const favOnlyBtn = el('button', 'menu_button wbm-chip' + (state.favOnly ? ' on' : ''), '★ 收藏');
+            const favOnlyBtn = el('button', 'menu_button wbm-chip' + (state.favOnly ? ' on' : ''), '★ Yêu thích');
             favOnlyBtn.type = 'button';
             favOnlyBtn.dataset.role = 'favonly';
-            const pinBtn = el('button', 'menu_button wbm-chip' + (pin ? ' on' : ''), pin ? '收藏置顶：开' : '收藏置顶：关');
+            const pinBtn = el('button', 'menu_button wbm-chip' + (pin ? ' on' : ''), pin ? 'Ghim yêu thích: bật' : 'Ghim yêu thích: tắt');
             pinBtn.type = 'button';
             pinBtn.dataset.role = 'favpin';
             favBar.appendChild(favOnlyBtn);
@@ -6783,7 +6783,7 @@
             fillActList(list, actives, editing, favs);
             root.appendChild(list);
             if (actives.length > COLLAPSED_COUNT) {
-                const more = el('button', 'wbm-more', state.expanded ? '收起' : '展开（共 ' + actives.length + ' 本）');
+                const more = el('button', 'wbm-more', state.expanded ? 'Thu gọn' : 'Mở rộng (tổng ' + actives.length + ' cuốn)');
                 more.type = 'button';
                 more.dataset.role = 'more';
                 root.appendChild(more);
@@ -7025,17 +7025,17 @@
 
     function syncPanelNotes() {
         panelNote('wbm-note-enhance', enhancementsOn()
-            ? '当前：全部增强生效中。'
-            : '当前：已全部关闭，界面就是原生酒馆；下面各开关的状态都保留着，重新勾上即恢复。');
+            ? 'Hiện tại: tất cả cải tiến đang hoạt động.'
+            : 'Hiện tại: đã tắt toàn bộ, giao diện là SillyTavern gốc; trạng thái các công tắc bên dưới vẫn được giữ, đánh dấu lại là khôi phục.');
         panelNote('wbm-note-entrylock', clickLockOn()
-            ? '已开启：条目内容被锁住，单击改不动；想改就双击那个字段（复选框与下拉也是双击）。'
-            : '已关闭：条目内容点一下就能改。');
+            ? 'Đang bật: nội dung mục bị khóa, nhấp một lần không sửa được; muốn sửa thì nhấp đúp vào trường đó (ô đánh dấu và menu thả xuống cũng vậy).'
+            : 'Đang tắt: chạm một lần là sửa được nội dung mục.');
         panelNote('wbm-note-msgdbl', store.msgDblClickEdit !== false
-            ? '已开启：双击消息正文＝点那颗铅笔；思考块与折叠美化块不处理。'
-            : '已关闭：双击正文不触发编辑，仍需点铅笔。');
+            ? 'Đang bật: nhấp đúp vào nội dung tin nhắn = bấm nút bút chì; khối suy nghĩ và khối thu gọn/trang trí không bị ảnh hưởng.'
+            : 'Đang tắt: nhấp đúp vào nội dung không mở chỉnh sửa, vẫn cần bấm bút chì.');
         panelNote('wbm-note-editbar', editBarOn()
-            ? '已开启：编辑期间在消息右下角再挂一排同样的按钮，顶部那排照旧，长消息不用往上翻。'
-            : '已关闭：只留消息顶部那排原生按钮。');
+            ? 'Đang bật: khi chỉnh sửa sẽ có thêm một hàng nút giống hệt ở góc dưới bên phải tin nhắn, hàng trên cùng vẫn giữ, tin nhắn dài không cần cuộn lên.'
+            : 'Đang tắt: chỉ giữ hàng nút gốc ở đầu tin nhắn.');
         const content = document.querySelector('#wbm-settings .inline-drawer-content');
         if (content) content.dataset.wbmIdle = enhancementsOn() ? '0' : '1';
     }
@@ -7048,33 +7048,33 @@
         wrap.className = 'inline-drawer';
         wrap.innerHTML = [
             '<div class="inline-drawer-toggle inline-drawer-header">',
-            '<b>双端酒馆原生功能优化</b>',
+            '<b>Tối ưu tính năng gốc SillyTavern (PC & Mobile)</b>',
             '<div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>',
             '</div>',
             '<div class="inline-drawer-content">',
 
             '<label class="checkbox_label wbm-opt-label" for="wbm-opt-enhance">',
             '<input id="wbm-opt-enhance" type="checkbox">',
-            '<span class="wbm-opt-text"><span class="wbm-opt-title">全部关闭（回到原生酒馆）</span>',
+            '<span class="wbm-opt-text"><span class="wbm-opt-title">Tắt toàn bộ (quay về SillyTavern gốc)</span>',
             '<span class="wbm-opt-note" id="wbm-note-enhance"></span></span>',
             '</label>',
 
-            '<div class="wbm-opt-group"><b>世界书功能</b></div>',
+            '<div class="wbm-opt-group"><b>Tính năng lorebook</b></div>',
             '<label class="checkbox_label wbm-opt-label" for="wbm-opt-entrylock">',
             '<input id="wbm-opt-entrylock" type="checkbox">',
-            '<span class="wbm-opt-text"><span class="wbm-opt-title">双击修改世界书条目（单击不改）</span>',
+            '<span class="wbm-opt-text"><span class="wbm-opt-title">Nhấp đúp để sửa mục lorebook (nhấp một lần không sửa)</span>',
             '<span class="wbm-opt-note" id="wbm-note-entrylock"></span></span>',
             '</label>',
 
-            '<div class="wbm-opt-group"><b>对话功能</b></div>',
+            '<div class="wbm-opt-group"><b>Tính năng hội thoại</b></div>',
             '<label class="checkbox_label wbm-opt-label" for="wbm-opt-msgdbl">',
             '<input id="wbm-opt-msgdbl" type="checkbox">',
-            '<span class="wbm-opt-text"><span class="wbm-opt-title">双击正文进入编辑</span>',
+            '<span class="wbm-opt-text"><span class="wbm-opt-title">Nhấp đúp vào nội dung để chỉnh sửa</span>',
             '<span class="wbm-opt-note" id="wbm-note-msgdbl"></span></span>',
             '</label>',
             '<label class="checkbox_label wbm-opt-label" for="wbm-opt-editbar">',
             '<input id="wbm-opt-editbar" type="checkbox">',
-            '<span class="wbm-opt-text"><span class="wbm-opt-title">编辑框上下操作栏</span>',
+            '<span class="wbm-opt-text"><span class="wbm-opt-title">Thanh thao tác trên và dưới khung sửa</span>',
             '<span class="wbm-opt-note" id="wbm-note-editbar"></span></span>',
             '</label>',
 
@@ -7094,8 +7094,8 @@
                 persistStore();
                 applyEnhanceState();
                 toast('info', enhanceBox.checked
-                    ? '已开启：全部增强生效'
-                    : '已全部关闭：界面回到原生酒馆，各开关状态已保留');
+                    ? 'Đã bật: tất cả cải tiến đang hoạt động'
+                    : 'Đã tắt toàn bộ: giao diện về SillyTavern gốc, trạng thái các công tắc được giữ lại');
             });
         }
         if (lockBox) {
@@ -7107,8 +7107,8 @@
                 syncLockChip();
                 syncPanelNotes();
                 toast('info', lockBox.checked
-                    ? '已开启：条目单击锁定、双击才改'
-                    : '已关闭：条目单击即可编辑');
+                    ? 'Đã bật: mục bị khóa khi nhấp một lần, nhấp đúp mới sửa'
+                    : 'Đã tắt: nhấp một lần là sửa được mục');
             });
         }
         if (msgBox) {
@@ -7117,7 +7117,7 @@
                 store.msgDblClickEdit = !!msgBox.checked;
                 persistStore();
                 syncPanelNotes();
-                toast('info', msgBox.checked ? '已开启：双击正文进入编辑' : '已关闭：双击正文不再进入编辑');
+                toast('info', msgBox.checked ? 'Đã bật: nhấp đúp vào nội dung để chỉnh sửa' : 'Đã tắt: nhấp đúp vào nội dung không còn mở chỉnh sửa');
             });
         }
         if (barBox) {
@@ -7128,8 +7128,8 @@
                 syncBottomRow();
                 syncPanelNotes();
                 toast('info', barBox.checked
-                    ? '已开启：编辑框右下角也有操作栏'
-                    : '已关闭：编辑框只保留顶部那排按钮');
+                    ? 'Đã bật: góc dưới bên phải khung sửa cũng có thanh thao tác'
+                    : 'Đã tắt: khung sửa chỉ giữ hàng nút phía trên');
             });
         }
         syncPanelNotes();
@@ -7358,12 +7358,12 @@
             let already = '';
             try { already = String(sessionStorage.getItem(VERSION_RELOAD_KEY) || ''); } catch (err) { /* ignore */ }
             if (already === target) {
-                console.warn('[wbm] 已为重载到 ' + target + ' 试过一次，页面仍是 ' + VERSION + '，不再重复（多半是浏览器缓存或服务器还没跟上）');
+                console.warn('[wbm] Đã thử tải lại lên ' + target + ' một lần, trang vẫn là ' + VERSION + ', không thử lại (thường do bộ nhớ đệm trình duyệt hoặc máy chủ chưa cập nhật)');
                 return;
             }
             try { sessionStorage.setItem(VERSION_RELOAD_KEY, target); } catch (err) { /* ignore */ }
-            console.info('[wbm] 发现新版本 ' + target + '（当前 ' + VERSION + '），1 秒后重载');
-            toast('info', '世界书增强有新版本，正在重载…');
+            console.info('[wbm] Phát hiện phiên bản mới ' + target + ' (hiện tại ' + VERSION + '), tải lại sau 1 giây');
+            toast('info', 'Tiện ích lorebook có phiên bản mới, đang tải lại…');
             setTimeout(async () => {
                 /* 关键：先把 manifest 用 cache:'reload' 拉一遍，把浏览器缓存里那份换成新的；
                    只调 location.reload() 的话，页面多半还会拿缓存里的旧 manifest，
@@ -7418,7 +7418,7 @@
         let already = '';
         try { already = String(sessionStorage.getItem(URL_HEAL_KEY) || ''); } catch (err) { already = ''; }
         if (already === '1') {
-            console.warn('[wbm] 地址里还留着 ' + RELOAD_PARAM + '，页面仍有重复副本；请手动刷新一次');
+            console.warn('[wbm] Địa chỉ vẫn còn ' + RELOAD_PARAM + ', trang vẫn có bản trùng lặp; hãy tự làm mới một lần');
             return false;
         }
         try { sessionStorage.setItem(URL_HEAL_KEY, '1'); } catch (err) { /* ignore */ }
@@ -7426,7 +7426,7 @@
         try {
             window.history.replaceState(null, '', url.pathname + url.search + url.hash);
         } catch (err) { /* 拿不到 history 就直接重载 */ }
-        console.info('[wbm] 页面出现重复副本（重载地址带着查询串），正在用干净地址重载一次');
+        console.info('[wbm] Trang có bản trùng lặp (địa chỉ tải lại còn chuỗi truy vấn), đang tải lại bằng địa chỉ sạch');
         window.location.reload();
         return true;
     }
