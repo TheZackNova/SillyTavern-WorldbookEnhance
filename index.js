@@ -6957,6 +6957,11 @@
 
     /* 总开关关掉后要能原地退回原生酒馆，不刷新页：把插进宿主 DOM 的东西收走、标记清掉，
        世界书那边靠的是 [data-wbm-ready] 这个 fail-safe 标记（去掉它原生控件立刻回来）。 */
+    const HOST_MARK_CLASSES = [
+        'wbm-field-locked', 'wbm-field-editing', 'wbm-select-open',
+        'wbm-order-on', 'wbm-fav-hidden', 'wbm-scope-row', 'wbm-world-row',
+    ];
+
     function teardownInjected() {
         const host = hostEl();
         if (host) {
@@ -6979,7 +6984,13 @@
         if (listRoot && listRoot.parentNode) listRoot.parentNode.removeChild(listRoot);
         /* 我们插进宿主的节点类名一律以 wbm- 开头，按前缀整批收走；
            设置抽屉要留着，否则关掉以后解不开。宿主自己的表单控件只清标记、不删。 */
+        /* Host elements that only carry a wbm- marker class must be unmarked, not removed.
+           Otherwise <html> (wbm-quiet-resize on Android) or ST's own rows get deleted → blank screen. */
+        HOST_MARK_CLASSES.forEach((cls) => {
+            document.querySelectorAll('.' + cls).forEach((node) => node.classList.remove(cls));
+        });
         document.querySelectorAll('[class*="wbm-"]').forEach((node) => {
+            if (node === document.documentElement || node === document.body) return;
             if (node.closest && node.closest('#wbm-settings')) return;
             const tag = node.tagName;
             if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
